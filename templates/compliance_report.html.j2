@@ -1,0 +1,117 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Network Compliance Report</title>
+  <meta name="description" content="Ansible compliance report output.">
+  <meta name="author" content="Zachary LeBlanc">
+
+  <meta property="og:title" content="Network Compliance Report">
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="Ansible compliance report output.">
+
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+  <style>
+    i.bi-check-circle-fill { color: green }
+    i.bi-x-circle-fill { color: red }
+  </style>
+
+</head>
+
+<body>
+  <div class="report-container">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Network Compliance Report</h5>
+      </div>
+    </div>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+            <th rowspan="2">Device</th>
+            <th colspan="4">SSH</th>
+            <th colspan="4">VTP</th>
+        </tr>
+        
+        <tr>
+            <th>Auth Timeout 120s?</th>
+            <th>DH Key 2048?</th>
+            <th>Retries 3?</th>
+            <th>Version 2?</th>
+            <th>Not Transparent?</th>
+            <th>Version 3?</th>
+            <th>Domain Name?</th>
+            <th>Password?</th>
+        </tr>
+      </thead>
+      <tbody id="compliance-table">
+{% for dev in device_data -%}
+        <tr>
+            <th scope="row" class="dev-name">{{ dev.name }}</th>
+            <td class="ssh-timeout">
+                {% if dev.facts.ssh.auth_timeout == 120 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="ssh-dh-bits">
+                {% if dev.facts.ssh.diffie_hellman_bits == 2048 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="ssh-retdies">
+                {% if dev.facts.ssh.auth_retries == 3 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="ssh-version">
+                {% if dev.facts.ssh.version == 2 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="vtp-op-mode">
+                {% if dev.facts.vtp.op_mode != 'transparent' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="vtp-version">
+                {% if dev.facts.vtp.version == 3 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="vtp-domain-name">
+                {% if dev.facts.vtp.domain_name is defined %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="vtp-pwd">
+                {% if dev.facts.vtp.password is defined %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

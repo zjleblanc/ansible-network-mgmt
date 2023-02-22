@@ -1,0 +1,27 @@
+---
+- name: Report on cisco devices (using mock data)
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - vars/mock_network_data.yml
+
+  tasks:
+    - name: Print device data
+      loop: "{{ device_data }}"
+      ansible.builtin.debug:
+        msg: "{{ item }}"
+
+    - name: Ensure dist dir exists
+      ansible.builtin.file:
+        path: dist
+        state: directory
+        mode: '0755'
+
+    - name: Template compliance Report
+      ansible.builtin.template:
+        src: compliance_report.html.j2
+        dest: dist/compliance_report.html
+        lstrip_blocks: true
+        trim_blocks: true
+        mode: '0664'

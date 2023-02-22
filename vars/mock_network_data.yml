@@ -1,0 +1,63 @@
+# Imagine this data coming from gather_facts 
+# or a manufacturer maintained module (e.g. cisco) 
+# and being parsed from the resulting output
+---
+device_data:
+  - name: cisco_dev_d300
+    facts:
+      ssh:
+        auth_timeout: 120
+        diffie_hellman_bits: 2048
+        auth_retries: 3
+        version: 2
+      vtp:
+        op_mode: Client
+        version: 3
+        domain_name: CISCO
+        password: Password is configured
+  - name: cisco_dev_41a7
+    facts:
+      ssh:
+        auth_timeout: 60
+        diffie_hellman_bits: 2048
+        auth_retries: 3
+        version: 2
+      vtp:
+        op_mode: Transparent
+        version: 3
+        domain_name: CISCO
+        password: s3cr3t
+  - name: cisco_dev_6450
+    facts:
+      ssh:
+        auth_timeout: 120
+        diffie_hellman_bits: 2048
+        auth_retries: 4
+        version: 1
+      vtp:
+        op_mode: Client
+        version: 3
+        domain_name: CISCO
+        password: an0nym0us
+  - name: cisco_dev_f1f6
+    facts:
+      ssh:
+        auth_timeout: 120
+        diffie_hellman_bits: 1024
+        auth_retries: 4
+        version: 2
+      vtp:
+        op_mode: Client
+        version: 3
+        domain_name: CISCO
+  - name: cisco_dev_7c5e
+    facts:
+      ssh:
+        auth_timeout: 120
+        diffie_hellman_bits: 2048
+        auth_retries: 4
+        version: 2
+      vtp:
+        op_mode: Client
+        version: 2
+        password: Password is configured
