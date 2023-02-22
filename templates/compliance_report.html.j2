@@ -33,75 +33,75 @@
       <thead>
         <tr>
             <th rowspan="2">Device</th>
-            <th colspan="4">SSH</th>
-            <th colspan="4">VTP</th>
+            <th class="text-center" colspan="4">SSH</th>
+            <th class="text-center" colspan="4">VTP</th>
         </tr>
         
         <tr>
-            <th>Auth Timeout 120s?</th>
-            <th>DH Key 2048?</th>
-            <th>Retries 3?</th>
-            <th>Version 2?</th>
-            <th>Not Transparent?</th>
-            <th>Version 3?</th>
-            <th>Domain Name?</th>
-            <th>Password?</th>
+            <th class="text-center">Auth Timeout 120s?</th>
+            <th class="text-center">DH Key 2048?</th>
+            <th class="text-center">Retries 3?</th>
+            <th class="text-center">Version 2?</th>
+            <th class="text-center">Not Transparent?</th>
+            <th class="text-center">Version 3?</th>
+            <th class="text-center">Domain Name?</th>
+            <th class="text-center">Password?</th>
         </tr>
       </thead>
       <tbody id="compliance-table">
 {% for dev in device_data -%}
         <tr>
             <th scope="row" class="dev-name">{{ dev.name }}</th>
-            <td class="ssh-timeout">
+            <td class="text-center ssh-timeout">
                 {% if dev.facts.ssh.auth_timeout == 120 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="ssh-dh-bits">
+            <td class="text-center ssh-dh-bits">
                 {% if dev.facts.ssh.diffie_hellman_bits == 2048 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="ssh-retdies">
+            <td class="text-center ssh-retdies">
                 {% if dev.facts.ssh.auth_retries == 3 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="ssh-version">
+            <td class="text-center ssh-version">
                 {% if dev.facts.ssh.version == 2 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="vtp-op-mode">
+            <td class="text-center vtp-op-mode">
                 {% if dev.facts.vtp.op_mode != 'transparent' %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="vtp-version">
+            <td class="text-center vtp-version">
                 {% if dev.facts.vtp.version == 3 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="vtp-domain-name">
+            <td class="text-center vtp-domain-name">
                 {% if dev.facts.vtp.domain_name is defined %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
                 {% endif %}
             </td>
-            <td class="vtp-pwd">
+            <td class="text-center vtp-pwd">
                 {% if dev.facts.vtp.password is defined %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
