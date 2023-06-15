@@ -1,0 +1,9 @@
+[allowlist]
+  description = "Global Allowlist"
+
+  # Ignore based on any subset of the file path
+  paths = [
+    # Ignore example cisco facts
+    '''\/.*cisco_facts\.json$''',
+    '''\/.*mock_network_data.yml$''',
+  ]
