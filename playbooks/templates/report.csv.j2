@@ -1,0 +1,5 @@
+Name,{{ ','.join(fact_names) }}
+{% for dev in devices -%}
+{% set flat_facts = lookup('ansible.utils.to_paths', dev.value) %}
+{{ dev.key }},{% for fact in fact_names -%}{{ flat_facts.get(fact,'') }}{% if not loop.last %},{% endif %}{% endfor %}\n
+{% endfor %}

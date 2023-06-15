@@ -1,0 +1,28 @@
+---
+- name: Report on cisco devices (using mock data)
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    fact_names: []
+
+  tasks:
+    - name: Lookup device data
+      ansible.builtin.set_fact:
+        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.yml') | from_json | dict2items }}"
+
+    - name: Get union of fact names
+      loop: "{{ devices }}"
+      loop_control:
+        loop_var: device
+        label: "{{ device.key }}"
+      ansible.builtin.set_fact:
+        fact_names: "{{ lookup('ansible.utils.to_paths', device.value).keys() | list | union(fact_names) }}"
+
+    - name: Template interactive report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/report.csv.j2"
+        dest: "{{ playbook_dir }}/../dist/comprehensive_report.csv"
+        lstrip_blocks: true
+        trim_blocks: true
+        mode: '0664'

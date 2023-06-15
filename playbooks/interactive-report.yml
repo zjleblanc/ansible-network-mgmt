@@ -1,0 +1,23 @@
+---
+- name: Report on cisco devices (using mock data)
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Lookup device data
+      ansible.builtin.set_fact:
+        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.yml') | from_json }}"
+
+    - name: Ensure dist dir exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../dist"
+        state: directory
+        mode: '0755'
+
+    - name: Template interactive report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/interactive_report.html.j2"
+        dest: "{{ playbook_dir }}/../dist/interactive_report.html"
+        lstrip_blocks: true
+        trim_blocks: true
+        mode: '0664'

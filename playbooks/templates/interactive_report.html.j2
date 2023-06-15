@@ -1,0 +1,96 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <title>Interactive Network Report</title>
+        <meta name="description" content="Ansible for networking interactive report.">
+        <meta name="author" content="Zachary LeBlanc">
+
+        <meta property="og:title" content="Interactive Network Report">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="Ansible for networking interactive report.">
+
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+
+        <style>
+            .wrapper { margin: 20px; }
+            .fancySearchRow input { padding: 5px; margin: 10px 0px; }
+            #facts-modal .modal-dialog { max-width: 100%; margin: 20px; }
+            .table td.facts-col { padding: .5rem .75rem }
+            .btn-facts { padding: 2px 4px; }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <h3>Cisco Devices</h3>
+            <table id="device-table" class="table table-striped">
+                <thead>
+                 <tr>
+                    <th data-sortas="case-insensitive">Inventory Hostname</th>
+                    <th>Model</th>
+                    <th>System</th>
+                    <th data-sortas="case-insensitive">Version</th>
+                    <th>Serial No.</th>
+                    <th>Op Mode</th>
+                    <th>Facts</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for key in devices -%}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ devices[key]['ansible_net_model'] }}</td>
+                        <td>{{ devices[key]['ansible_net_system'] }}</td>
+                        <td>{{ devices[key]['ansible_net_version'] }}</td>
+                        <td>{{ devices[key]['ansible_net_serialnum'] }}</td>
+                        <td>{{ devices[key]['ansible_net_operatingmode'] | default('unknown') }}</td>
+                        <td class="facts-col">
+                            <button 
+                                type="button" 
+                                class="btn btn-info btn-facts" 
+                                data-toggle="modal" 
+                                data-target="#facts-modal"
+                                data-facts='{{ devices[key] | tojson }}'
+                            >
+                                <svg width="20" height="20" fill="currentColor" class="bi bi-hdd" viewBox="0 0 16 16">
+                                    <path d="M4.5 11a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zM3 10.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0z"/>
+                                    <path d="M16 11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V9.51c0-.418.105-.83.305-1.197l2.472-4.531A1.5 1.5 0 0 1 4.094 3h7.812a1.5 1.5 0 0 1 1.317.782l2.472 4.53c.2.368.305.78.305 1.198V11zM3.655 4.26 1.592 8.043C1.724 8.014 1.86 8 2 8h12c.14 0 .276.014.408.042L12.345 4.26a.5.5 0 0 0-.439-.26H4.094a.5.5 0 0 0-.44.26zM1 10v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1z"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>           
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="facts-modal" tabindex="-1" role="dialog" aria-labelledby="facts-modal-title" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="facts-modal-title">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-code"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+            </div>
+        </div>
+        </div>
+         
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery.fancytable/dist/fancyTable.min.js"></script>
+        <script src="js/json-viewer.js"></script>
+        <script type="text/javascript">
+            {% include 'interactive_report.js.j2' %}   
+        </script>
+    </body>
+</html>

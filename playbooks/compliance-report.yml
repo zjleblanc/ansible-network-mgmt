@@ -4,7 +4,7 @@
   gather_facts: false
 
   vars_files:
-    - vars/mock_network_data.yml
+    - "{{ playbook_dir }}/../vars/mock_network_data.yml"
 
   tasks:
     - name: Print device data
@@ -14,14 +14,14 @@
 
     - name: Ensure dist dir exists
       ansible.builtin.file:
-        path: dist
+        path: "{{ playbook_dir }}/../dist"
         state: directory
         mode: '0755'
 
     - name: Template compliance Report
       ansible.builtin.template:
-        src: compliance_report.html.j2
-        dest: dist/compliance_report.html
+        src: "{{ playbook_dir }}/templates/compliance_report.html.j2"
+        dest: "{{ playbook_dir }}/../dist/compliance_report.html"
         lstrip_blocks: true
         trim_blocks: true
         mode: '0664'
