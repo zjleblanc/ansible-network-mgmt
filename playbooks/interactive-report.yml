@@ -6,7 +6,7 @@
   tasks:
     - name: Lookup device data
       ansible.builtin.set_fact:
-        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.yml') | from_json }}"
+        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.json') | from_json }}"
 
     - name: Ensure dist dir exists
       ansible.builtin.file:

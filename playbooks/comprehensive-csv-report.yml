@@ -9,7 +9,7 @@
   tasks:
     - name: Lookup device data
       ansible.builtin.set_fact:
-        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.yml') | from_json | dict2items }}"
+        devices: "{{ lookup('file', playbook_dir + '/../vars/cisco_facts.json') | from_json | dict2items }}"
 
     - name: Get union of fact names
       loop: "{{ devices }}"
