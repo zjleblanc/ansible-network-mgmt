@@ -14,4 +14,4 @@ This template includes a few css/js libraries to keep the core simple and use av
 
 ![Interactive Report](../.attachments/interactive_report.png)
 <br>
-<img alt="Interactive Report Modal" style="max-width: 300px" src="../.attachments/interactive_report_modal.png">
+<img alt="Interactive Report Modal" width="300px" src="../.attachments/interactive_report_modal.png">
