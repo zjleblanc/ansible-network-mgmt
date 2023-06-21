@@ -40,7 +40,7 @@
   - delegate_to: "{{ report_server }}"
     become: true
     debug:
-      var: "{{ play_hosts }}"
+      var: "{{ ansible_play_hosts }}"
 
   # - name: Create HTML report
   #   ansible.builtin.template:
