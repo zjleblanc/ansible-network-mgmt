@@ -37,14 +37,10 @@
       state: directory
       mode: "0755"
 
-  - delegate_to: "{{ report_server }}"
+  - name: Create HTML report
+    delegate_to: "{{ report_server }}"
     become: true
-    debug:
-      msg: "{{ ansible_play_hosts }}"
-
-  # - name: Create HTML report
-  #   ansible.builtin.template:
-  #     src: report.j2
-  #     dest: "{{ web_path }}/compliance.html"
-  #     mode: "0644"
-  #   check_mode: false
+    ansible.builtin.template:
+      src: "{{ playbook_dir }}/templates/compliance.html.j2"
+      dest: "{{ web_path }}/compliance.html"
+      mode: "0644"
