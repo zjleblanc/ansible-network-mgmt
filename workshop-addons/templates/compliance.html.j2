@@ -1,0 +1,118 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Network Compliance Report</title>
+  <meta name="description" content="Ansible compliance report output.">
+  <meta name="author" content="Zachary LeBlanc">
+
+  <meta property="og:title" content="Network Compliance Report">
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="Ansible compliance report output.">
+
+  <!-- CSS only -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+  <style>
+    i.bi-check-circle-fill { color: green }
+    i.bi-x-circle-fill { color: red }
+  </style>
+
+</head>
+
+<body>
+  <div class="report-container">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Network Compliance Report</h5>
+      </div>
+    </div>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+            <th rowspan="2">Device</th>
+            <th class="text-center" colspan="4">SSH</th>
+            <th class="text-center" colspan="4">VTP</th>
+        </tr>
+        
+        <tr>
+            <th class="text-center">Auth Timeout 120s?</th>
+            <th class="text-center">DH Key 2048?</th>
+            <th class="text-center">Retries 3?</th>
+            <th class="text-center">Version 2?</th>
+            <th class="text-center">Not Transparent?</th>
+            <th class="text-center">Version 3?</th>
+            <th class="text-center">Domain Name?</th>
+            <th class="text-center">Password?</th>
+        </tr>
+      </thead>
+      <tbody id="compliance-table">
+{% for device in ansible_play_hosts -%}
+    {% set facts = ansible_facts[device] %}
+        <tr>
+            <th scope="row" class="dev-name">{{ device }}</th>
+            <td class="text-center ssh-timeout">
+                {% if facts['ssh_auth_timeout'] == '120' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center ssh-dh-bits">
+                {% if facts['ssh_dh_key_bits'] == '2048' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center ssh-retries">
+                {% if facts['ssh_auth_retries'] == '3' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center ssh-version">
+                {% if facts['ssh_version'][0] == '2' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center vtp-op-mode">
+                {% if facts['vtp_op_mode'].lower() != 'transparent' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center vtp-version">
+                {% if facts['vtp_version'] == '3' %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center vtp-domain-name">
+                {% if len(facts['vtp_domain_name']) > 0 %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+            <td class="text-center vtp-pwd">
+                {% if facts['vtp_password'] %}
+                <i class="bi bi-check-circle-fill"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill"></i>
+                {% endif %}
+            </td>
+        </tr>
+{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
