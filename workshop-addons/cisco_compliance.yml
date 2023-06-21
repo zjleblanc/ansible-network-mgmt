@@ -1,0 +1,9 @@
+---
+- name: Cisco Compliance Report
+  hosts: "{{ _hosts | default(omit) }}"
+  gather_facts: no
+
+  tasks:
+  - name: Run show version on remote devices
+    cisco.ios.ios_command:
+      commands: show ip ssh
