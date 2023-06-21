@@ -50,7 +50,7 @@
       </thead>
       <tbody id="compliance-table">
 {% for device in ansible_play_hosts -%}
-    {% set facts = ansible_facts[device] %}
+    {% set facts = hostvars[device] %}
         <tr>
             <th scope="row" class="dev-name">{{ device }}</th>
             <td class="text-center ssh-timeout">
