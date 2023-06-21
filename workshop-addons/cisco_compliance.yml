@@ -31,12 +31,14 @@
 
   - name: Create web directory if it does not exist
     delegate_to: "{{ report_server }}"
+    become: true
     ansible.builtin.file:
       path: "{{ web_path }}"
       state: directory
       mode: "0755"
 
   - delegate_to: "{{ report_server }}"
+    become: true
     debug:
       var: "{{ play_hosts }}"
 
