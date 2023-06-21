@@ -96,7 +96,7 @@
                 {% endif %}
             </td>
             <td class="text-center vtp-domain-name">
-                {% if len(facts['vtp_domain_name']) > 0 %}
+                {% if facts['vtp_domain_name']|length > 0 %}
                 <i class="bi bi-check-circle-fill"></i>
                 {% else %}
                 <i class="bi bi-x-circle-fill"></i>
