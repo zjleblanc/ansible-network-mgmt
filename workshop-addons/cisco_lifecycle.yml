@@ -1,0 +1,21 @@
+---
+- name: Cisco Lifecycle Report
+  hosts: "{{ _hosts | default(omit) }}"
+  gather_facts: true
+
+  vars:
+    cisco_eox_token: "undef"
+
+  tasks:
+    - name: Get lifecycle information from EoX API
+      when: cisco_eox_token != 'undef'
+      register: r_eox_lifecycle
+      ansible.builtin.uri:
+        url: "https://api.cisco.com/supporttools/eox/rest/5/EOXBySerialNumber/1/{{ ansible_net_serialnum }}?responseencoding=json"
+        headers:
+          Authorization: "Bearer {{ cisco_eox_token }}"
+
+    - name: Get mock lifecycle information
+      ansible.builtin.set_fact:
+        r_eox_lifecycle:
+          json: "{{ lookup('template', playbook_dir + '/templates/eox_response.json.j2') | from_json }}"
