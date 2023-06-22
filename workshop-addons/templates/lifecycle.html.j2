@@ -78,6 +78,7 @@
         $( "#lifecycle-table td.eol-date" ).each(function() {
             let dateVal = Date.parse($(this).text());
             let dateDiff = Math.abs(dateVal - now) / 86400000;
+            console.log($(this).text() + ": " + dateDiff);
             if(dateDiff < 0) {
                 $(this).addClass('date-past');
             } else if(dateDiff < 90) {
