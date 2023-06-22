@@ -16,10 +16,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
   <style>
-    .date-past { color: red }
-    .date-quarter { color: orange }
-    .date-year { color: yellow }
-    .date-far-out { color: green }
+    .report-container { padding: 10px; }
+    #legend { margin-top: 20px }
+    .date-past { background-color: "#ffcfbf" }
+    .date-quarter { background-color: "#ffefbf" }
+    .date-year { background-color: "#ffffbf" }
+    .date-far-out { }
   </style>
 
 </head>
@@ -70,6 +72,15 @@
 {% endfor %}
       </tbody>
     </table>
+
+    <ul id="legend" class="list-group">
+        <li class="list-group-item" aria-current="true">Legend</li>
+        <li class="list-group-item date-past">Date has passed</li>
+        <li class="list-group-item date-quarter">Date will pass within 90 days</li>
+        <li class="list-group-item date-year">Date will pass within the year</li>
+        <li class="list-group-item date-far-out">Date is more than a year out</li>
+    </ul>
+
   </div>
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script>
