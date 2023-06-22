@@ -17,10 +17,12 @@
 
   <style>
     .report-container { padding: 10px; }
-    #legend { margin-top: 20px }
-    .date-past { background-color: "#ffcfbf" }
-    .date-quarter { background-color: "#ffefbf" }
-    .date-year { background-color: "#ffffbf" }
+    .card-table-title { margin-bottom: 10px; }
+    .table-radius-6 { border-radius: 6px }
+    #legend { margin-top: 10px }
+    .date-past { background-color: #ffcfbf }
+    .date-quarter { background-color: #ffefbf }
+    .date-year { background-color: #ffffbf }
     .date-far-out { }
   </style>
 
@@ -28,12 +30,12 @@
 
 <body>
   <div class="report-container">
-    <div class="card">
+    <div class="card card-table-title">
       <div class="card-body">
         <h5 class="card-title">Network Lifecycle Report</h5>
       </div>
     </div>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-radius-6">
       <thead>
         <tr>
             <th rowspan="2">Device</th>
