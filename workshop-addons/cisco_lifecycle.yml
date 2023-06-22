@@ -5,6 +5,8 @@
 
   vars:
     cisco_eox_token: "undef"
+    report_server: node1
+    web_path: /var/www/html/reports/
 
   tasks:
     - name: Get lifecycle information from EoX API
@@ -19,3 +21,20 @@
       ansible.builtin.set_fact:
         r_eox_lifecycle:
           json: "{{ lookup('template', playbook_dir + '/templates/eox_response.json.j2') }}"
+
+    - name: Publish report
+      delegate_to: "{{ report_server }}"
+      run_once: true
+      become: true
+      block:
+        - name: Create web directory if it does not exist # noqa run-once[task]
+          ansible.builtin.file:
+            path: "{{ web_path }}"
+            state: directory
+            mode: "0755"
+
+        - name: Create HTML report  # noqa run-once[task]
+          ansible.builtin.template:
+            src: "{{ playbook_dir }}/templates/lifecycle.html.j2"
+            dest: "{{ web_path }}/eox_lifecycle.html"
+            mode: "0644"
