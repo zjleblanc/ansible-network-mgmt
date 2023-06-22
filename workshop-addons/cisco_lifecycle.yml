@@ -3,6 +3,9 @@
   hosts: "{{ _hosts | default(omit) }}"
   gather_facts: true
 
+  vars_files:
+    - "{{ playbook_dir }}/vars/mock_eox_data.yml"
+
   vars:
     cisco_eox_token: "undef"
     report_server: node1

@@ -1,0 +1,49 @@
+mock_eox_data:
+  "sandbox-iosxe-latest-1.cisco.com":
+    EOLProductID: CISCO1811/K9
+    ProductIDDescription: Security Router	
+    ProductBulletinNumber: EOL7073
+    EndOfSaleDate:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days\" +%Y-%m-%d') }}"
+    EndOfSWMaintenanceReleases:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days +1 year\" +%Y-%m-%d') }}"
+    EndOfSecurityVulSupportDate:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days  +1 year +8 months\" +%Y-%m-%d') }}"
+    EndOfRoutineFailureAnalysisDate:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days +1 year\" +%Y-%m-%d') }}"
+    EndOfServiceContractRenewal:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days +3 years +3 months\" +%Y-%m-%d') }}"
+    LastDateOfSupport:
+      value: "{{ lookup('pipe', 'date --date=\"-30 days +4 years +15 days\" +%Y-%m-%d') }}"
+  "sandbox-iosxr-1.cisco.com	":
+    EOLProductID: CISCO1811/K9
+    ProductIDDescription: Security Router	
+    ProductBulletinNumber: EOL7073
+    EndOfSaleDate:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days\" +%Y-%m-%d') }}"
+    EndOfSWMaintenanceReleases:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days +1 year\" +%Y-%m-%d') }}"
+    EndOfSecurityVulSupportDate:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days  +1 year +8 months\" +%Y-%m-%d') }}"
+    EndOfRoutineFailureAnalysisDate:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days +1 year\" +%Y-%m-%d') }}"
+    EndOfServiceContractRenewal:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days +3 years +3 months\" +%Y-%m-%d') }}"
+    LastDateOfSupport:
+      value: "{{ lookup('pipe', 'date --date=\"-390 days +4 years +15 days\" +%Y-%m-%d') }}"
+  "sandbox-nxos-1.cisco.com	":
+    EOLProductID: CISCO1811/K9
+    ProductIDDescription: Security Router	
+    ProductBulletinNumber: EOL7073
+    EndOfSaleDate:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days\" +%Y-%m-%d') }}"
+    EndOfSWMaintenanceReleases:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days +1 year\" +%Y-%m-%d') }}"
+    EndOfSecurityVulSupportDate:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days  +1 year +8 months\" +%Y-%m-%d') }}"
+    EndOfRoutineFailureAnalysisDate:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days +1 year\" +%Y-%m-%d') }}"
+    EndOfServiceContractRenewal:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days +3 years +3 months\" +%Y-%m-%d') }}"
+    LastDateOfSupport:
+      value: "{{ lookup('pipe', 'date --date=\"+365 days +4 years +15 days\" +%Y-%m-%d') }}"

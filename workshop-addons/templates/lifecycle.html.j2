@@ -51,7 +51,8 @@
       </thead>
       <tbody id="lifecycle-table">
 {% for device in ansible_play_hosts -%}
-    {% set data = hostvars[device]['r_eox_lifecycle']['json']['EOXRecord'][0] %}
+    {# set data = hostvars[device]['r_eox_lifecycle']['json']['EOXRecord'][0] #}
+    {% set data = mock_eox_data[device] %}
         <tr>
             <th scope="row" class="dev-name">{{ device }}</th>
             <td class="text-center">{{ data['EOLProductID'] }}</td>
