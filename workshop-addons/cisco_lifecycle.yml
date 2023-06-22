@@ -18,4 +18,4 @@
     - name: Get mock lifecycle information
       ansible.builtin.set_fact:
         r_eox_lifecycle:
-          json: "{{ lookup('template', playbook_dir + '/templates/eox_response.json.j2') | from_json }}"
+          json: "{{ lookup('template', playbook_dir + '/templates/eox_response.json.j2') }}"
