@@ -16,8 +16,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
 
   <style>
-    i.bi-check-circle-fill { color: green }
-    i.bi-x-circle-fill { color: red }
+    .date-past { color: red }
+    .date-quarter { color: orange }
+    .date-year { color: yellow }
+    .date-far-out { color: green }
   </style>
 
 </head>
@@ -58,16 +60,35 @@
             <td class="text-center">{{ data['EOLProductID'] }}</td>
             <td class="text-center">{{ data['ProductIDDescription'] }}</td>
             <td class="text-center">{{ data['ProductBulletinNumber'] }}</td>
-            <td class="text-center">{{ data['EndOfSaleDate']['value'] }}</td>
-            <td class="text-center">{{ data['EndOfSWMaintenanceReleases']['value'] }}</td>
-            <td class="text-center">{{ data['EndOfSecurityVulSupportDate']['value'] }}</td>
-            <td class="text-center">{{ data['EndOfRoutineFailureAnalysisDate']['value'] }}</td>
-            <td class="text-center">{{ data['EndOfServiceContractRenewal']['value'] }}</td>
-            <td class="text-center">{{ data['LastDateOfSupport']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['EndOfSaleDate']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['EndOfSWMaintenanceReleases']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['EndOfSecurityVulSupportDate']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['EndOfRoutineFailureAnalysisDate']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['EndOfServiceContractRenewal']['value'] }}</td>
+            <td class="text-center eol-date">{{ data['LastDateOfSupport']['value'] }}</td>
         </tr>
 {% endfor %}
       </tbody>
     </table>
   </div>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script>
+    $(function() {
+        const now = new Date();
+        $( "#lifecycle-table td.eol-date" ).each(function() {
+            let dateVal = Date.parse($(this).text());
+            let dateDiff = Math.abs(dateVal - now) / 86400000;
+            if(dateDiff < 0) {
+                $(this).addClass('date-past');
+            } else if(dateDiff < 90) {
+                $(this).addClass('date-quarter');
+            } else if(dateDiff < 365) {
+                $(this).addClass('date-year');
+            } else {
+                $(this).addClass('date-far-out');
+            }
+        });
+    });
+  </script>
 </body>
 </html>
