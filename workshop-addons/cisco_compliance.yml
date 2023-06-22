@@ -7,40 +7,40 @@
     report_server: node1
     web_path: /var/www/html/reports/
 
-
   tasks:
-  - name: ios commands
-    when: ansible_network_os == 'cisco.ios.ios'
-    register: r_ios_commands
-    cisco.ios.ios_command:
-      commands: 
-        - show ip ssh
-        - show vtp status
-        - show vtp password
+    - name: ios commands
+      when: ansible_network_os == 'cisco.ios.ios'
+      register: r_ios_commands
+      cisco.ios.ios_command:
+        commands: 
+          - show ip ssh
+          - show vtp status
+          - show vtp password
 
-  - name: perform checks
-    ansible.builtin.set_fact:
-      ssh_version: "{{ (r_ios_commands.stdout_lines[0][0]).split(' ')[-1] }}"
-      ssh_dh_key_bits: "{{ (r_ios_commands.stdout_lines[0][8]).split(' ')[-2] }}"
-      ssh_auth_timeout: "{{ (r_ios_commands.stdout_lines[0][7]).split(' ')[2] }}"
-      ssh_auth_retries: "{{ (r_ios_commands.stdout_lines[0][7]).split(' ')[-1] }}"
-      vtp_version: "{{ (r_ios_commands.stdout_lines[1][1]).split(': ')[-1] }}"
-      vtp_domain_name: "{{ (r_ios_commands.stdout_lines[1][2]).split(': ')[-1] }}"
-      vtp_password: "{{  'not configured' not in (r_ios_commands.stdout[2]) }}"
-      vtp_op_mode: "{{  r_ios_commands.stdout_lines[1][-6].split(': ')[-1] }}"
+    - name: perform checks
+      ansible.builtin.set_fact:
+        ssh_version: "{{ (r_ios_commands.stdout_lines[0][0]).split(' ')[-1] }}"
+        ssh_dh_key_bits: "{{ (r_ios_commands.stdout_lines[0][8]).split(' ')[-2] }}"
+        ssh_auth_timeout: "{{ (r_ios_commands.stdout_lines[0][7]).split(' ')[2] }}"
+        ssh_auth_retries: "{{ (r_ios_commands.stdout_lines[0][7]).split(' ')[-1] }}"
+        vtp_version: "{{ (r_ios_commands.stdout_lines[1][1]).split(': ')[-1] }}"
+        vtp_domain_name: "{{ (r_ios_commands.stdout_lines[1][2]).split(': ')[-1] }}"
+        vtp_password: "{{  'not configured' not in (r_ios_commands.stdout[2]) }}"
+        vtp_op_mode: "{{  r_ios_commands.stdout_lines[1][-6].split(': ')[-1] }}"
 
-  - name: Create web directory if it does not exist
-    delegate_to: "{{ report_server }}"
-    become: true
-    ansible.builtin.file:
-      path: "{{ web_path }}"
-      state: directory
-      mode: "0755"
+    - name: Publish report
+      delegate_to: "{{ report_server }}"
+      run_once: true
+      become: true
+      block:
+        - name: Create web directory if it does not exist  # noqa run-once[task]
+          ansible.builtin.file:
+            path: "{{ web_path }}"
+            state: directory
+            mode: "0755"
 
-  - name: Create HTML report
-    delegate_to: "{{ report_server }}"
-    become: true
-    ansible.builtin.template:
-      src: "{{ playbook_dir }}/templates/compliance.html.j2"
-      dest: "{{ web_path }}/compliance.html"
-      mode: "0644"
+        - name: Create HTML report  # noqa run-once[task]
+          ansible.builtin.template:
+            src: "{{ playbook_dir }}/templates/compliance.html.j2"
+            dest: "{{ web_path }}/compliance.html"
+            mode: "0644"
