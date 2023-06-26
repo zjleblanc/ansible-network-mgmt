@@ -1,4 +1,5 @@
 .vscode/
+playbooks/facts/
 
 # Mac
 *.DS_Store

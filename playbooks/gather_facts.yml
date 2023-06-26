@@ -1,0 +1,18 @@
+- name: Gather facts
+  hosts: all
+  gather_facts: false
+  
+  tasks:
+    - name: Gather nxos facts
+      cisco.nxos.nxos_facts:
+        gather_subset: all
+
+    - name: Create output directory
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/facts"
+        state: directory
+
+    - name: Write facts to file
+      ansible.builtin.copy:
+        content: "{{ ansible_facts | to_nice_json }}"
+        dest: "{{ playbook_dir }}/facts/{{ inventory_hostname }}.json"
