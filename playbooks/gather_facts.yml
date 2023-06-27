@@ -4,8 +4,13 @@
   
   tasks:
     - name: Gather nxos facts
+      when: ansible_network_os == 'nxos'
       cisco.nxos.nxos_facts:
         gather_subset: all
+
+    - name: Gather ios facts
+      when: ansible_network_os == 'cisco.ios.ios'
+      cisco.ios.ios_facts:
 
     - name: Create output directory
       ansible.builtin.file:

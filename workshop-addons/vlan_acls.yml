@@ -1,0 +1,15 @@
+---
+- name: Find vlans with restricted ACL
+  hosts: "{{ _hosts | default(omit) }}"
+  gather_facts: no
+
+  tasks:
+    - name: Gather listed vlans with provided configurations
+      register: r_ios_vlans
+      cisco.ios.ios_vlans:
+        config:
+        state: gathered
+
+    - name: Display vlans
+      ansible.builtin.debug:
+        var: r_ios_vlans

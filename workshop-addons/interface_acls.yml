@@ -1,0 +1,25 @@
+---
+- name: Find interfaces with restricted ACL
+  hosts: "{{ _hosts | default(omit) }}"
+  gather_facts: no
+
+  tasks:
+    - name: Gather all ACLs
+      register: r_ios_acls
+      cisco.ios.ios_acls:
+        config:
+        state: gathered
+
+    - name: Display ACLs
+      ansible.builtin.debug:
+        var: r_ios_acls
+
+    - name: Gather ACLs applied to interfaces
+      register: r_ios_int_acls
+      cisco.ios.ios_acl_interfaces:
+        config:
+        state: gathered
+
+    - name: Display restricted interfaces
+      ansible.builtin.debug:
+        var: r_ios_int_acls

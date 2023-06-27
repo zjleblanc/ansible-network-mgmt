@@ -1,0 +1,66 @@
+---
+- name: Upgrade Cisco Devices
+  hosts: router_two
+  gather_facts: false
+  become: true
+
+  vars:
+    cisco_update_binary: "{{ playbook_dir }}/../bin/c7200-advipservicesk9-mz.152-4.S5.bin"
+    cisco_update_md5: "{{ lookup('file', cisco_update_binary) | md5 }}"
+    # ENV: ANSIBLE_PARAMIKO_LOOK_FOR_KEYS=false
+
+  tasks:
+    # ip scp server enable
+    - name: Copy binary to device # noqa risky-file-permissions
+      vars:
+        ansible_command_timeout: 600
+      ansible.netcommon.net_put:
+        src: "{{ cisco_update_binary }}"
+        dest: "{{ boot_drive }}:/{{ cisco_update_binary | basename }}"
+
+    - name: Verify checksum
+      register: r_checksum
+      cisco.ios.ios_command:
+        commands:
+          - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary | basename }} {{ cisco_update_md5 }}"
+
+    - name: Check if binary is already present
+      cisco.ios.ios_command:
+        commands:
+          - show version | include "{{ cisco_update_binary | basename }}"
+      register: version_output
+      changed_when: false
+
+    - name: Set boot image
+      when: version_output.stdout[0] == ''
+      cisco.ios.ios_config:
+        lines:
+          - no boot system
+          - "boot system {{ boot_drive }}:/{{ cisco_update_binary | basename }}"
+        save_when: modified
+
+    - name: Reboot device # noqa no-handler
+      when: version_output.stdout[0] == ''
+      tags: reboot
+      cisco.ios.ios_command:
+        commands:
+          - command: "reload in 1"
+            prompt: "Proceed with reload"
+            answer: "y"
+
+    - name: Wait for reload command
+      tags: reboot
+      ansible.builtin.pause:
+        seconds: 90
+
+    - name: Restart eve-ng node
+      tags: reboot
+      ansible.builtin.include_tasks: tasks/restart_eve_ng_node.yml
+
+    - name: Wait for the switch to become available
+      tags: reboot
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 22
+        timeout: 3000

@@ -1,0 +1,32 @@
+---
+- name: Restart eve-ng node | message
+  tags: reboot
+  ansible.builtin.debug:
+    msg: "Restarting eve-ng node {{ eve_ng_node }} in lab {{ eve_ng_lab }}"
+
+- name: Restart eve-ng node | login
+  tags: reboot
+  register: r_eve_ng_login
+  ansible.builtin.uri:
+    url: "{{ eve_ng_base_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      username: admin
+      password: "{{ eve_ng_pwd }}"
+
+- name: Restart eve-ng node | start
+  tags: reboot
+  ansible.builtin.uri:
+    url: "{{ eve_ng_base_url }}/api/labs/{{ eve_ng_lab }}/nodes/{{ eve_ng_node }}/start"
+    method: GET
+    headers:
+      Cookie: "{{ r_eve_ng_login.set_cookie }}"
+
+- name: Restart eve-ng node | logout
+  tags: reboot
+  ansible.builtin.uri:
+    url: "{{ eve_ng_base_url }}/api/auth/logout"
+    method: GET
+    headers:
+      Cookie: "{{ r_eve_ng_login.set_cookie }}"
