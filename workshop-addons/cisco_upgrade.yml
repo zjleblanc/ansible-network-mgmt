@@ -1,6 +1,6 @@
 ---
 - name: Upgrade Cisco Devices
-  hosts: router_two
+  hosts: "{{ _hosts | default(omit) }}"
   gather_facts: false
   become: true
 
@@ -12,6 +12,7 @@
   tasks:
     # ip scp server enable
     - name: Copy binary to device # noqa risky-file-permissions
+      tags: copy_image
       vars:
         ansible_command_timeout: 600
       ansible.netcommon.net_put:
@@ -19,12 +20,14 @@
         dest: "{{ boot_drive }}:/{{ cisco_update_binary | basename }}"
 
     - name: Verify checksum
+      tags: copy_image
       register: r_checksum
       cisco.ios.ios_command:
         commands:
           - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary | basename }} {{ cisco_update_md5 }}"
 
     - name: Check if binary is already present
+      tags: reboot
       cisco.ios.ios_command:
         commands:
           - show version | include "{{ cisco_update_binary | basename }}"
@@ -32,6 +35,7 @@
       changed_when: false
 
     - name: Set boot image
+      tags: reboot
       when: version_output.stdout[0] == ''
       cisco.ios.ios_config:
         lines:
