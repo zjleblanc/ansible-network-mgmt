@@ -1,0 +1,8 @@
+---
+servers:
+  - server: 172.16.1.12
+    version: 2
+  - server: checkServerDomainIpv6.com
+    use_ipv6: true
+  - server: 172.16.1.13
+    source: GigabitEthernet0/1

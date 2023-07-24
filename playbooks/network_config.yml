@@ -21,8 +21,8 @@
       loop_control:
         loop_var: resource
       vars:
-        config_file: "{{ playbook_dir }}/configs/{{ resource }}.cfg"
+        config_file: "{{ playbook_dir }}/configs/{{ resource }}.yml"
       ansible.netcommon.network_resource:
         name: "{{ resource }}"
-        config: "{{ (lookup('file', config_file) | from_yaml)['cfg'] }}"
+        config: "{{ (lookup('file', config_file) | from_yaml) }}"
         state: merged

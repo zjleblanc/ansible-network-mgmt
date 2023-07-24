@@ -1,0 +1,7 @@
+---
+location: Virtual
+communities:
+  - name: Durham
+    rw: true
+  - name: ChapelHill
+    rw: true
