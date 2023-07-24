@@ -1,0 +1,30 @@
+---
+- name: Rename access points using aireos
+  hosts: aireos
+  gather_facts: false
+
+  tasks:
+    - name: Rename the access point
+      community.network.aireos_config:
+        lines: sysname testDevice
+
+    - name: Diff the running-config against a provided config
+      community.network.aireos_config:
+        diff_against: intended
+        intended_config: "{{ lookup('file', 'master.cfg') }}"
+
+    - name: Load new acl into device
+      community.network.aireos_config:
+        lines:
+          - acl create testACL
+          - acl rule protocol testACL 1 any
+          - acl rule direction testACL 3 in
+        before: acl delete testACL
+
+    - name: Configurable backup path
+      community.network.aireos_config:
+        backup: true
+        lines: sysname testDevice
+        backup_options:
+          filename: backup.cfg
+          dir_path: /home/user

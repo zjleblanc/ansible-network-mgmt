@@ -1,0 +1,56 @@
+---
+- name: Example scenario handling route failover for an external SQL endpoint
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - "{{ playbook_dir }}/vars/bgp_config.yml"
+
+  vars:
+    external_sql_host: "1.2.3.4"
+    external_sql_netmask: "255.255.255.0"
+    external_sql_port: 1433
+    static_route_next_hop: 10.0.0.1
+
+  tasks:
+    - name: Complete route failover if SQL port inaccessible
+      block:
+        - name: Check all port numbers are accessible from the current host
+          register: r_sql_port
+          ansible.builtin.wait_for:
+            host: mywebserver.com
+            port: "{{ external_sql_port }}"
+            state: started         # Port should be open
+            delay: 5               # wait 5 seconds between checks
+            timeout: 3
+      rescue:
+        - name: Remove static route from the DR core switches
+          delegate_to: dr_core_switches # group in inventory
+          ansible.netcommon.net_static_route:
+            prefix: "{{ external_sql_host }}"
+            mask: "{{ external_sql_netmask }}" 
+            next_hop: "{{ static_route_next_hop }}"
+            state: absent
+
+        - name: Remove bgp from config
+          delegate_to: dr_core_switches # group in inventory
+          cisco.nxos.nxos_bgp_global:
+            state: deleted
+
+        - name: Gracefully exit playbook
+          ansible.builtin.meta: end_play
+
+    # SQL was accessible
+    - name: Configure static route on the DR core switches
+      delegate_to: dr_core_switches # group in inventory
+      ansible.netcommon.net_static_route:
+        prefix: "{{ external_sql_host }}"
+        mask: "{{ external_sql_netmask }}" 
+        next_hop: "{{ static_route_next_hop }}"
+        state: present
+
+    - name: Configure bgp
+      delegate_to: dr_core_switches # group in inventory
+      cisco.ios.ios_bgp:
+        config: "{{ nxos_bgp_global_config }}" 
+        operation: replaced # have the option of merged as well

@@ -1,6 +1,7 @@
 .vscode/
 bin/
 playbooks/facts/
+playbooks/artifacts/
 
 # Mac
 *.DS_Store

@@ -1,0 +1,39 @@
+---
+- name: Generate ACLs from O365 data
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    client_request_id: b10c5ed1-bad1-445f-b386-b919946339a7
+
+  tasks:
+    - name: Retrieve O365 endpoints
+      register: r_endpoints
+      ansible.builtin.uri:
+        url: "https://endpoints.office.com/endpoints/worldwide?clientrequestid={{ client_request_id }}"
+        method: get
+        return_content: true
+
+    - name: Write static json to file for inspection
+      ansible.builtin.copy:
+        content: "{{ r_endpoints.json | to_nice_json }}"
+        dest: "{{ playbook_dir }}/artifacts/o365_acls.json"
+
+    - name: Template acls # noqa: risky-file-permissions
+      ansible.builtin.template:
+        src: o365_acls.j2
+        dest: "{{ playbook_dir }}/artifacts/o365_acls.txt"
+        lstrip_blocks: false
+      vars:
+        o365_ips: "{{ r_endpoints.json | json_query('[].ips[]') | list }}"
+
+    - name: Parse given config to structured data
+      delegate_to: sandbox-iosxe-latest-1.cisco.com
+      register: r_acls
+      cisco.nxos.nxos_acls:
+        running_config: "{{ lookup('file', playbook_dir + '/artifacts/o365_acls.txt') }}"
+        state: parsed
+
+    - name: Debug the parsed ACLs
+      ansible.builtin.debug:
+        var: r_acls

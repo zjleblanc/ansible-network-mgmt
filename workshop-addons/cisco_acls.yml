@@ -1,0 +1,15 @@
+---
+- name: Find interfaces with restricted ACL
+  hosts: ios
+  gather_facts: false
+
+  tasks:
+    - name: Parse raw acls
+      register: r_parsed
+      cisco.ios.ios_acls:
+        running_config: "{{ lookup('file', playbook_dir + '/acls.cfg') }}"
+        state: parsed
+
+    - name: Apply acls
+      cisco.ios.ios_acls:
+        config: "{{ r_parsed.parsed }}"
