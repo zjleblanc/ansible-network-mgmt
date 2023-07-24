@@ -1,0 +1,28 @@
+---
+- name: Push network configs to cisco devices
+  hosts: "{{ _hosts | default('ios') }}"
+  gather_facts: true
+  become: true
+
+  vars:
+    resource_modules:
+      - acls
+      - bgp_global
+      - hostname
+      - l3_interfaces
+      - ntp_global
+      - ospfv2
+      - prefix_lists
+      - snmp_server
+
+  tasks:
+    - name: Push standard configuration to devices based on resource
+      loop: "{{ resource_modules }}"
+      loop_control:
+        loop_var: resource
+      vars:
+        config_file: "{{ playbook_dir }}/configs/{{ resource }}.cfg"
+      ansible.netcommon.network_resource:
+        name: "{{ resource }}"
+        config: "{{ (lookup('file', config_file) | from_yaml)['cfg'] }}"
+        state: merged
