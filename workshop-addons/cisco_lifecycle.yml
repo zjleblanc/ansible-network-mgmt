@@ -3,14 +3,16 @@
   hosts: "{{ _hosts | default('ios-sbox') }}"
   gather_facts: false
 
-  vars_files:
-    - "{{ playbook_dir }}/vars/mock_eox_data_macos.yml"
-
   vars:
     cisco_eox_token: "undef"
     web_path: /var/www/reports.autodotes.com/networking/demo
 
   tasks:
+    - name: Load mock EOX data
+      when: cisco_eox_token == 'undef'
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/vars/mock_eox_data{{ macosx_suffix | default('') }}.yml"
+
     - name: Get lifecycle information from EoX API
       when:
         - ansible_net_serialnum is defined
