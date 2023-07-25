@@ -15,16 +15,16 @@
     - name: Download binary from remote src
       ansible.builtin.get_url:
         url: "{{ cisco_update_src }}"
-        dest: "{{ cisco_update_dest }}"
-
-    # ip scp server enable
-    - name: Copy binary to device # noqa risky-file-permissions
-      tags: copy_image
-      vars:
-        ansible_command_timeout: 600
-      ansible.netcommon.net_put:
-        src: "{{ cisco_update_dest }}"
         dest: "{{ boot_drive }}:/{{ cisco_binary }}"
+
+    # # ip scp server enable
+    # - name: Copy binary to device # noqa risky-file-permissions
+    #   tags: copy_image
+    #   vars:
+    #     ansible_command_timeout: 600
+    #   ansible.netcommon.net_put:
+    #     src: "{{ cisco_update_dest }}"
+    #     dest: "{{ boot_drive }}:/{{ cisco_binary }}"
 
     - name: Verify checksum
       tags: copy_image
