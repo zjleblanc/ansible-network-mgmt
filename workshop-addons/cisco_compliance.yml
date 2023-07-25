@@ -1,23 +1,22 @@
 ---
 - name: Cisco Compliance Report
-  hosts: "{{ _hosts | default(omit) }}"
-  gather_facts: no
+  hosts: "{{ _hosts | default('ios-sbox') }}"
+  gather_facts: false
 
   vars:
-    report_server: node1
-    web_path: /var/www/html/reports/
+    web_path: /var/www/reports.autodotes.com/networking/demo
 
   tasks:
-    - name: ios commands
+    - name: ios commands # noqa: name
       when: ansible_network_os == 'cisco.ios.ios'
       register: r_ios_commands
       cisco.ios.ios_command:
-        commands: 
+        commands:
           - show ip ssh
           - show vtp status
           - show vtp password
 
-    - name: perform checks
+    - name: Perform checks
       ansible.builtin.set_fact:
         ssh_version: "{{ (r_ios_commands.stdout_lines[0][0]).split(' ')[-1] }}"
         ssh_dh_key_bits: "{{ (r_ios_commands.stdout_lines[0][8]).split(' ')[-2] }}"

@@ -56,6 +56,6 @@
 			"MigrationProductInfoURL": "https://www.cisco.com"  
 		},
 		"EOXInputType": "ShowEOXBySerialNumber",
-		"EOXInputValue": "{{ ansible_net_serialnum }}"
+		"EOXInputValue": "{{ ansible_net_serialnum | default('<serial_no>') }}"
 	}]
 } 

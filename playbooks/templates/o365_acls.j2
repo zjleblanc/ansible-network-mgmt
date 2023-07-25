@@ -1,13 +1,13 @@
 ip access-list extended Internet-In
 {% for ip in o365_ips -%}
 {% filter indent(width=4) %}
-    {{ loop.index * 10 }} permit ip {{ ip }} host x.x.x.x
+    {{ loop.index * 10 }} permit ip {{ ip.split('/')[0] }} {{ ip | ansible.utils.ipaddr('hostmask') }} host x.x.x.x
 {% endfilter %}
 {% endfor -%}
 
 ip access-list extended Internet-Out
 {% for ip in o365_ips -%}
 {% filter indent(width=4) %}
-    {{ loop.index * 10 }} permit ip host x.x.x.x {{ ip }}
+    {{ loop.index * 10 }} permit ip host x.x.x.x {{ ip.split('/')[0] }} {{ ip | ansible.utils.ipaddr('hostmask') }}
 {% endfilter %}
 {% endfor -%}

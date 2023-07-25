@@ -1,0 +1,25 @@
+---
+- name: Find vlans with restricted ACL
+  hosts: "{{ _hosts | default('ios-sbox') }}"
+  gather_facts: false
+
+  tasks:
+    - name: Gather listed vlans with provided configurations
+      register: r_ios_vlans
+      cisco.ios.ios_vlans:
+        config:
+        state: gathered
+
+    - name: Display vlans
+      ansible.builtin.debug:
+        var: r_ios_vlans
+
+    - name: Show auth session
+      register: r_auth_session
+      cisco.ios.ios_command:
+        commands:
+          - show authentication session
+
+    - name: Display auth sessions
+      ansible.builtin.debug:
+        var: r_auth_session

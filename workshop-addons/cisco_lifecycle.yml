@@ -1,19 +1,20 @@
 ---
 - name: Cisco Lifecycle Report
-  hosts: "{{ _hosts | default(omit) }}"
-  gather_facts: true
+  hosts: "{{ _hosts | default('ios-sbox') }}"
+  gather_facts: false
 
   vars_files:
-    - "{{ playbook_dir }}/vars/mock_eox_data.yml"
+    - "{{ playbook_dir }}/vars/mock_eox_data_macos.yml"
 
   vars:
     cisco_eox_token: "undef"
-    report_server: node1
-    web_path: /var/www/html/reports/
+    web_path: /var/www/reports.autodotes.com/networking/demo
 
   tasks:
     - name: Get lifecycle information from EoX API
-      when: cisco_eox_token != 'undef'
+      when:
+        - ansible_net_serialnum is defined
+        - cisco_eox_token != 'undef'
       register: r_eox_lifecycle
       ansible.builtin.uri:
         url: "https://api.cisco.com/supporttools/eox/rest/5/EOXBySerialNumber/1/{{ ansible_net_serialnum }}?responseencoding=json"

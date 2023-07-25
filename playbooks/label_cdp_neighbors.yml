@@ -1,5 +1,5 @@
 - name: Label CDP Neighbors
-  hosts: all
+  hosts: nxos
   gather_facts: false
 
   tasks:
@@ -15,3 +15,8 @@
           - description Connected to {{ item.value[0].host }} via its {{ item.value[0].port }}
         parents: interface {{ item.key }}
         save_when: changed
+
+    - name: Debug mgmt interface descriptions
+      when: ansible_network_os == 'nxos'
+      ansible.builtin.debug:
+        msg: "{{ ansible_net_interfaces['mgmt0'] }}"

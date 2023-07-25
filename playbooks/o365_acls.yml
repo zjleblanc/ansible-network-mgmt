@@ -14,18 +14,18 @@
         method: get
         return_content: true
 
-    - name: Write static json to file for inspection
+    - name: Write static json to file for inspection # noqa: risky-file-permissions
       ansible.builtin.copy:
         content: "{{ r_endpoints.json | to_nice_json }}"
         dest: "{{ playbook_dir }}/artifacts/o365_acls.json"
 
-    - name: Template acls # noqa: risky-file-permissions
+    - name: Template acls # noqa: risky-file-permissions jinja
       ansible.builtin.template:
         src: o365_acls.j2
         dest: "{{ playbook_dir }}/artifacts/o365_acls.txt"
         lstrip_blocks: false
       vars:
-        o365_ips: "{{ r_endpoints.json | json_query('[].ips[]') | list }}"
+        o365_ips: "{{ r_endpoints.json | json_query('[].ips[]') | ansible.utils.ipv4 | list }}"
 
     - name: Parse given config to structured data
       delegate_to: sandbox-iosxe-latest-1.cisco.com

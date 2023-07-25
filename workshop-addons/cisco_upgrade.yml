@@ -1,6 +1,6 @@
 ---
 - name: Upgrade Cisco Devices
-  hosts: "{{ _hosts | default(omit) }}"
+  hosts: "{{ _hosts | default(ansible_limit) }}"
   gather_facts: false
   become: true
 
