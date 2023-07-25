@@ -5,32 +5,42 @@
   become: true
 
   vars:
-    cisco_update_binary: "{{ playbook_dir }}/../bin/c7200-advipservicesk9-mz.152-4.S5.bin"
+    cisco_update_binary_src: "https://artifacts.autodotes.com/bin/c7200-advipservicesk9-mz.152-4.S5.bin"
+    cisco_update_binary_dest: "/tmp/c7200-advipservicesk9-mz.152-4.S5.bin"
     cisco_update_md5: "{{ lookup('file', cisco_update_binary) | md5 }}"
     # ENV: ANSIBLE_PARAMIKO_LOOK_FOR_KEYS=false
 
   tasks:
+    # ip scp server enable
+    - name: Copy binary to EE # noqa risky-file-permissions
+      tags: copy_image
+      vars:
+        ansible_command_timeout: 600
+      ansible.builtin.copy:
+        remote_src: "{{ cisco_update_binary_src }}"
+        dest: "{{ cisco_update_binary_dest }}"
+
     # ip scp server enable
     - name: Copy binary to device # noqa risky-file-permissions
       tags: copy_image
       vars:
         ansible_command_timeout: 600
       ansible.netcommon.net_put:
-        src: "{{ cisco_update_binary }}"
-        dest: "{{ boot_drive }}:/{{ cisco_update_binary | basename }}"
+        src: "{{ cisco_update_binary_dest }}"
+        dest: "{{ boot_drive }}:/{{ cisco_update_binary_dest | basename }}"
 
     - name: Verify checksum
       tags: copy_image
       register: r_checksum
       cisco.ios.ios_command:
         commands:
-          - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary | basename }} {{ cisco_update_md5 }}"
+          - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary_dest | basename }} {{ cisco_update_md5 }}"
 
     - name: Check if binary is already present
       tags: reboot
       cisco.ios.ios_command:
         commands:
-          - show version | include "{{ cisco_update_binary | basename }}"
+          - show version | include "{{ cisco_update_binary_dest | basename }}"
       register: version_output
       changed_when: false
 
@@ -40,7 +50,7 @@
       cisco.ios.ios_config:
         lines:
           - no boot system
-          - "boot system {{ boot_drive }}:/{{ cisco_update_binary | basename }}"
+          - "boot system {{ boot_drive }}:/{{ cisco_update_binary_dest | basename }}"
         save_when: modified
 
     - name: Reboot device # noqa no-handler
