@@ -14,7 +14,8 @@
   tasks:
     - name: Download binary from remote src
       ansible.builtin.copy:
-        remote_src: "{{ cisco_update_src }}"
+        src: "{{ cisco_update_src }}"
+        remote_src: true
         dest: "{{ boot_drive }}:/{{ cisco_binary }}"
 
     # # ip scp server enable
