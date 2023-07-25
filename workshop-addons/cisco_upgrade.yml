@@ -16,8 +16,8 @@
       tags: copy_image
       vars:
         ansible_command_timeout: 600
-      ansible.builtin.copy:
-        remote_src: "{{ cisco_update_binary_src }}"
+      ansible.builtin.get_url:
+        url: "{{ cisco_update_binary_src }}"
         dest: "{{ cisco_update_binary_dest }}"
 
     # ip scp server enable
