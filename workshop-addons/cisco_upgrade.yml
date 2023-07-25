@@ -15,7 +15,7 @@
     - name: Download binary from remote src
       ansible.builtin.get_url:
         url: "{{ cisco_update_src }}"
-        dest: "{{ boot_drive }}:/{{ cisco_binary }}"
+        dest: "{{ boot_drive }}://{{ cisco_binary }}"
 
     # # ip scp server enable
     # - name: Copy binary to device # noqa risky-file-permissions
