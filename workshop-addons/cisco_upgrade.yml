@@ -27,20 +27,20 @@
         ansible_command_timeout: 600
       ansible.netcommon.net_put:
         src: "{{ cisco_update_binary_dest }}"
-        dest: "{{ boot_drive }}:/{{ cisco_update_binary_dest | basename }}"
+        dest: "{{ boot_drive }}:/{{ cisco_update_binary_dest | ansible.builtin.basename }}"
 
     - name: Verify checksum
       tags: copy_image
       register: r_checksum
       cisco.ios.ios_command:
         commands:
-          - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary_dest | basename }} {{ cisco_update_md5 }}"
+          - "verify /md5 {{ boot_drive }}:/{{ cisco_update_binary_dest | ansible.builtin.basename }} {{ cisco_update_md5 }}"
 
     - name: Check if binary is already present
       tags: reboot
       cisco.ios.ios_command:
         commands:
-          - show version | include "{{ cisco_update_binary_dest | basename }}"
+          - show version | include "{{ cisco_update_binary_dest | ansible.builtin.basename }}"
       register: version_output
       changed_when: false
 
@@ -50,7 +50,7 @@
       cisco.ios.ios_config:
         lines:
           - no boot system
-          - "boot system {{ boot_drive }}:/{{ cisco_update_binary_dest | basename }}"
+          - "boot system {{ boot_drive }}:/{{ cisco_update_binary_dest | ansible.builtin.basename }}"
         save_when: modified
 
     - name: Reboot device # noqa no-handler
