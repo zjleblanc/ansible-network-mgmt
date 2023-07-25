@@ -14,6 +14,11 @@
         method: get
         return_content: true
 
+    - name: Ensure artifacts directory exists # noqa: risky-file-permissions
+      ansible.builtin.file:
+        name: "{{ playbook_dir }}/artifacts"
+        state: directory
+
     - name: Write static json to file for inspection # noqa: risky-file-permissions
       ansible.builtin.copy:
         content: "{{ r_endpoints.json | to_nice_json }}"
