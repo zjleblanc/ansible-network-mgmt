@@ -14,7 +14,7 @@
         commands:
           - show ip ssh
           - show vtp status
-          - show vtp password
+          # - show vtp password
 
     - name: Perform checks
       ansible.builtin.set_fact:
@@ -24,7 +24,8 @@
         ssh_auth_retries: "{{ (r_ios_commands.stdout_lines[0][7]).split(' ')[-1] }}"
         vtp_version: "{{ (r_ios_commands.stdout_lines[1][1]).split(': ')[-1] }}"
         vtp_domain_name: "{{ (r_ios_commands.stdout_lines[1][2]).split(': ')[-1] }}"
-        vtp_password: "{{  'not configured' not in (r_ios_commands.stdout[2]) }}"
+        # vtp_password: "{{  'not configured' not in (r_ios_commands.stdout[2]) }}"
+        vtp_password: false
         vtp_op_mode: "{{  r_ios_commands.stdout_lines[1][-6].split(': ')[-1] }}"
 
     - name: Publish report
