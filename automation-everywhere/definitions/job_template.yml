@@ -1,0 +1,37 @@
+job_templates:
+-   name: Automation Everywhere // VLAN Slack Notification
+    organization: Autodotes
+    job_type: run
+    inventory: Cisco Lab
+    project: Network Management
+    playbook: automation-everywhere/playbooks/slack_notification.yml
+    credentials:
+      - "{{ slack_credential.name }}"
+
+-   name: Automation Everywhere // Network Backup
+    organization: Autodotes
+    job_type: run
+    inventory: Cisco Lab
+    project: Network Management
+    playbook: automation-everywhere/playbooks/network_backup.yml
+    ask_limit_on_launch: true
+    credentials:
+      - Controller Credential
+
+-   name: Automation Everywhere // Network Restore
+    organization: Autodotes
+    job_type: run
+    inventory: Cisco Lab
+    project: Network Management
+    playbook: automation-everywhere/playbooks/network_restore.yml
+    ask_limit_on_launch: true
+    credentials:
+      - Controller Credential
+      
+-   name: Automation Everywhere //  Network VLANs
+    organization: Red Hat network organization
+    job_type: run
+    inventory: Cisco Lab
+    project: Network Management
+    playbook: automation-everywhere/playbooks/network_vlans.yml
+    ask_limit_on_launch: true

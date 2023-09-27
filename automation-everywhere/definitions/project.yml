@@ -1,0 +1,5 @@
+workshop_project:
+  name: Network Management
+  organization: Autodotes
+  scm_url: https://github.com/zjleblanc/ansible-network-mgmt.git
+  scm_branch: master

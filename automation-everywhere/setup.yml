@@ -1,0 +1,76 @@
+---
+- name: Create AAP Resources for Automation Everywhere Demo
+  hosts: localhost
+  gather_facts: false
+
+  vars_files:
+    - "{{ playbook_dir }}/definitions/project.yml"
+    - "{{ playbook_dir }}/definitions/credential_type.yml"
+    - "{{ playbook_dir }}/definitions/credential.yml"
+    - "{{ playbook_dir }}/definitions/job_template.yml"
+    - "{{ playbook_dir }}/definitions/workflow_job_template.yml"
+
+  tasks:
+    - name: Determine that both AAP and Machine credentials are set
+      ansible.builtin.assert:
+        that:
+          - "lookup('env', 'CONTROLLER_USERNAME') !=''"
+        fail_msg:
+          - "This Job requires two credentials"
+          - "Red Hat Ansible Automation Platform credential is not set"
+          - "Please assign correct credentials to the Job Template"
+
+    - name: Determine that both AAP and Machine credentials are set
+      ansible.builtin.debug:
+        msg:
+          - "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
+          - "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
+          - "{{ lookup('env', 'CONTROLLER_HOST') }}"
+
+    - name: Create Slack API Token Credential Type
+      awx.awx.credential_type:
+        name: "{{ slack_credential_type.name }}"
+        description: "{{ slack_credential_type.description }}"
+        kind: "{{ slack_credential_type.kind }}"
+        inputs: "{{ slack_credential_type.inputs }}"
+        injectors: "{{ slack_credential_type.injectors }}"
+        state: present
+        validate_certs: false
+
+    - name: Create Slack API Token Credential
+      when:
+        - input_slack_token is defined
+        - input_slack_token|length > 0
+      awx.awx.credential:
+        name: "{{ slack_credential.name }}"
+        organization: "{{ slack_credential.organization }}"
+        credential_type: "{{ slack_credential.credential_type }}"
+        inputs: "{{ slack_credential.inputs }}"
+        state: present
+
+    - name: Create Job Templates
+      loop: "{{ job_templates }}"
+      loop_control:
+        loop_var: jt
+      awx.awx.job_template:
+        name: "{{ jt.name }}"
+        organization: "{{ jt.organization }}"
+        job_type: "{{ jt.job_type }}"
+        inventory: "{{ jt.inventory }}"
+        project: "{{ jt.project }}"
+        playbook: "{{ jt.playbook }}"
+        credentials: "{{ jt.credentials }}"
+        ask_limit_on_launch: "{{ jt.ask_limit_on_launch | default(omit) }}"
+        state: present
+
+    - name: Create VLAN Workflow Job Template
+      awx.awx.workflow_job_template:
+        name: "{{ vlan_wjt.name }}"
+        description: "{{ vlan_wjt.description }}"
+        organization: "{{ vlan_wjt.organization }}"
+        inventory: "{{ vlan_wjt.inventory }}"
+        survey_enabled: "{{ vlan_wjt.survey_enabled }}"
+        survey_spec: "{{ vlan_wjt.survey_spec }}"
+        limit: "{{ vlan_wjt.limit }}"
+        workflow_nodes: "{{ vlan_wjt.workflow_nodes }}"
+        state: present
