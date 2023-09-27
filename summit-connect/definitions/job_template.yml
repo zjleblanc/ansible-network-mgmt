@@ -35,3 +35,4 @@ job_templates:
     project: Network Management
     playbook: summit-connect/playbooks/network_vlans.yml
     ask_limit_on_launch: true
+    credentials: []
