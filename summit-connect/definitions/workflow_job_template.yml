@@ -53,7 +53,7 @@ vlan_wjt:
         type: job_template
     - identifier: Network Restore
       unified_job_template:
-        name: Network Automation - Restore
+        name: Summit Connect // Network Restore
         organization:
-            name: Red Hat network organization
+            name: Autodotes
         type: job_template
