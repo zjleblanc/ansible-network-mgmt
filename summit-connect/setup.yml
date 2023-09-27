@@ -14,18 +14,11 @@
     - name: Determine that both AAP and Machine credentials are set
       ansible.builtin.assert:
         that:
-          - "lookup('env', 'CONTROLLER_USERNAME') !=''"
+          - "lookup('env', 'CONTROLLER_HOST') !=''"
         fail_msg:
           - "This Job requires two credentials"
           - "Red Hat Ansible Automation Platform credential is not set"
           - "Please assign correct credentials to the Job Template"
-
-    - name: Determine that both AAP and Machine credentials are set
-      ansible.builtin.debug:
-        msg:
-          - "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
-          - "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
-          - "{{ lookup('env', 'CONTROLLER_HOST') }}"
 
     - name: Create Slack API Token Credential Type
       awx.awx.credential_type:
