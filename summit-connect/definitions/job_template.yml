@@ -4,7 +4,7 @@ job_templates:
     job_type: run
     inventory: Cisco Lab
     project: Network Management
-    playbook: automation-everywhere/playbooks/slack_notification.yml
+    playbook: summit-connect/playbooks/slack_notification.yml
     credentials:
       - "{{ slack_credential.name }}"
 
@@ -13,7 +13,7 @@ job_templates:
     job_type: run
     inventory: Cisco Lab
     project: Network Management
-    playbook: automation-everywhere/playbooks/network_backup.yml
+    playbook: summit-connect/playbooks/network_backup.yml
     ask_limit_on_launch: true
     credentials:
       - Controller Credential
@@ -23,7 +23,7 @@ job_templates:
     job_type: run
     inventory: Cisco Lab
     project: Network Management
-    playbook: automation-everywhere/playbooks/network_restore.yml
+    playbook: summit-connect/playbooks/network_restore.yml
     ask_limit_on_launch: true
     credentials:
       - Controller Credential
@@ -33,5 +33,5 @@ job_templates:
     job_type: run
     inventory: Cisco Lab
     project: Network Management
-    playbook: automation-everywhere/playbooks/network_vlans.yml
+    playbook: summit-connect/playbooks/network_vlans.yml
     ask_limit_on_launch: true
