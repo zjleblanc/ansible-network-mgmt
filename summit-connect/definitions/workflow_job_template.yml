@@ -1,5 +1,5 @@
 vlan_wjt:
-  name: Automation Everywhere // VLAN Configuration Workflow
+  name: Summit Connect // VLAN Configuration Workflow
   description: Demo workflow for configuring VLANs and notifying users of changes via Slack
   organization: Autodotes
   inventory: Cisco Lab
@@ -27,7 +27,7 @@ vlan_wjt:
           - identifier: Network Backup
     - identifier: Network Backup
       unified_job_template:
-        name: Automation Everywhere // Network Backup
+        name: Summit Connect // Network Backup
         organization:
             name: Autodotes
         type: job_template
@@ -36,7 +36,7 @@ vlan_wjt:
           - identifier: Configure VLANs
     - identifier: Configure VLANs
       unified_job_template:
-        name: Automation Everywhere //  Network VLANs
+        name: Summit Connect //  Network VLANs
         organization:
             name: Autodotes
         type: job_template
@@ -47,7 +47,7 @@ vlan_wjt:
           - identifier: Network Restore
     - identifier: VLAN Slack Notification
       unified_job_template:
-        name: Automation Everywhere // VLAN Slack Notification
+        name: Summit Connect // VLAN Slack Notification
         organization:
             name: Autodotes
         type: job_template

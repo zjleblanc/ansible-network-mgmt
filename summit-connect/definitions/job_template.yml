@@ -1,5 +1,5 @@
 job_templates:
--   name: Automation Everywhere // VLAN Slack Notification
+-   name: Summit Connect // VLAN Slack Notification
     organization: Autodotes
     job_type: run
     inventory: Cisco Lab
@@ -8,7 +8,7 @@ job_templates:
     credentials:
       - "{{ slack_credential.name }}"
 
--   name: Automation Everywhere // Network Backup
+-   name: Summit Connect // Network Backup
     organization: Autodotes
     job_type: run
     inventory: Cisco Lab
@@ -18,7 +18,7 @@ job_templates:
     credentials:
       - Controller Credential
 
--   name: Automation Everywhere // Network Restore
+-   name: Summit Connect // Network Restore
     organization: Autodotes
     job_type: run
     inventory: Cisco Lab
@@ -28,7 +28,7 @@ job_templates:
     credentials:
       - Controller Credential
       
--   name: Automation Everywhere //  Network VLANs
+-   name: Summit Connect //  Network VLANs
     organization: Red Hat network organization
     job_type: run
     inventory: Cisco Lab

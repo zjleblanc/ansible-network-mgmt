@@ -1,0 +1,33 @@
+---
+- name: Custom slack notification for networking vlan changes
+  hosts: localhost
+
+  tasks:
+    - name: Check for stats
+      block:
+        - name: Assert stats passed from vlan playbook
+          ansible.builtin.assert:
+            that: workflow_vlans is defined
+      rescue:
+        - name: Set default value
+          ansible.builtin.set_fact:
+            workflow_vlans: []
+
+    - name: Debug set stats
+      ansible.builtin.debug:
+        var: workflow_vlans
+
+    - name: Post diff to slack
+      loop: "{{ workflow_vlans }}"
+      loop_control:
+        loop_var: vlan
+      ansible.builtin.uri:
+        url: https://slack.com/api/files.upload
+        method: POST
+        headers:
+          Authorization: "Bearer {{ slack_token }}"
+        body_format: form-multipart
+        body:
+          content: "{{ vlan.diff }}"
+          title: "VLAN changes for {{ vlan.hostname }}"
+          channels: "summit-connect-demo"
