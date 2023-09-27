@@ -29,7 +29,7 @@ job_templates:
       - Controller Credential
       
 -   name: Summit Connect //  Network VLANs
-    organization: Red Hat network organization
+    organization: Autodotes
     job_type: run
     inventory: Cisco Lab
     project: Network Management
