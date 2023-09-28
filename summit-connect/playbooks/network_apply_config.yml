@@ -23,11 +23,11 @@
     - name: Transform network_configs into dictionary if coming from controller
       when: network_configs is string
       ansible.builtin.set_fact:
-        vlan_config: "{{ net_vlan_config | from_yaml }}"
+        network_configs_safe: "{{ network_configs | from_yaml }}"
 
     - name: Set each config
       when: ansible_network_os is defined
-      loop: "{{ network_configs | dict2items }}"
+      loop: "{{ network_configs_safe | dict2items }}"
       ansible.netcommon.network_resource:
         name: "{{ item.key }}"
         state: "merged"
