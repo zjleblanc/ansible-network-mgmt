@@ -1,0 +1,75 @@
+---
+- name: Unpack
+  ansible.builtin.include_tasks: unpack.yml
+
+- name: Set repo path
+  ansible.builtin.set_fact:
+    git_repo_path: "{{ git_url | regex_search('/(.+).git') | regex_replace('.git', '') }}"
+
+- name: Git add all new files
+  ansible.builtin.shell: git add -A
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+
+- name: Git status
+  ansible.builtin.shell: git status
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+  register: git_add_status
+
+- name: Git username
+  when: git_username is defined
+  ansible.builtin.shell: git config user.name "{{ git_username }}"
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+
+- name: Git email
+  when: git_email is defined
+  ansible.builtin.shell: git config user.email "{{ git_email }}"
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+
+- name: Git commit
+  ansible.builtin.shell: git commit -a -m "{{ git_msg }}"
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+  ignore_errors: true
+  register: git_commit
+
+- name: Git wrapper
+  ansible.builtin.copy:
+    dest: "{{ playbook_dir }}/.ssh/ssh"
+    content: "ssh -i {{ git_temp_file.path }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $*"
+    mode: 0700
+
+- name: Git push
+  when: git_commit is not failed
+  ansible.builtin.shell: git push --force
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+  environment:
+    GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
+
+- name: Git tag
+  when:
+    - git_commit is not failed
+    - git_tag is defined
+  ansible.builtin.shell: git tag {{ git_tag|default('ansible') }} {{ git_branch }} && git push origin {{ git_tag|default('ansible') }}
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+  environment:
+    GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
+
+- name: Git status
+  ansible.builtin.shell: git status
+  args:
+    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+  register: git_add_status
+
+- name: Cleanup local repo
+  when: git_remove_local
+  ansible.builtin.shell: rm -rf {{ playbook_dir }}{{ git_repo_path }}
+  register: git_cleanup_repo
+
+- name: Cleanup keys
+  ansible.builtin.include_tasks: cleanup_keys.yml

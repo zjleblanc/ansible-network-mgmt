@@ -1,0 +1,20 @@
+---
+- name: Generate diffs
+  loop: "{{ device_report.changes | default([]) }}"
+  ansible.utils.fact_diff:
+    before: "{{ item.before }}"
+    after: "{{ item.after }}"
+  register: r_diffs
+
+- name: Post each diff to slack
+  loop: "{{ r_diffs.results | default([]) }}"
+  ansible.builtin.uri:
+    url: https://slack.com/api/files.upload
+    method: POST
+    headers:
+      Authorization: "Bearer {{ slack_token }}"
+    body_format: form-multipart
+    body:
+      content: "{{ item.diff_text }}"
+      title: "Config changes made to {{ device_report.hostname }}"
+      channels: "summit-connect-demo"

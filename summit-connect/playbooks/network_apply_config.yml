@@ -1,0 +1,47 @@
+---
+- name: Configure network ACLs
+  hosts: "{{ _hosts }}"
+  gather_facts: false
+
+  vars:
+    network_configs:
+      interfaces:
+        - description: MANAGEMENT INTERFACE - DON'T TOUCH ME
+          enabled: true
+          name: GigabitEthernet1
+        - description: Port to Fabric (edit 2 -> ansible)
+          enabled: true
+          name: GigabitEthernet2
+
+  tasks:
+    - name: Assert that network config was sent
+      ansible.builtin.assert:
+        that: network_configs is defined
+        fail_msg: "no 'network_configs' was sent, please send a valid configuration set as the variable network_configs"
+        success_msg: "all assertions passed"
+
+    - name: Transform network_configs into dictionary if coming from controller
+      when: network_configs is string
+      ansible.builtin.set_fact:
+        vlan_config: "{{ net_vlan_config | from_yaml }}"
+
+    - name: Set each config
+      when: ansible_network_os is defined
+      loop: "{{ network_configs | dict2items }}"
+      ansible.netcommon.network_resource:
+        name: "{{ item.key }}"
+        state: "merged"
+        config: "{{ item.value }}"
+      register: r_apply_config
+
+    - name: Build config change report for host
+      ansible.builtin.set_fact:
+        config_report:
+          hostname: "{{ inventory_hostname }}"
+          changes: "{{ r_apply_config.results | selectattr('changed') }}"
+
+    - name: Build config change report
+      ansible.builtin.set_stats:
+        data:
+          workflow_config_reports:
+            - "{{ config_report }}"

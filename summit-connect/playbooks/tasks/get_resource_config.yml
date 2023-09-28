@@ -1,0 +1,16 @@
+---
+- name: Try get resource config
+  block:
+    - name: "Gather resource configs | {{ ansible_network_os }} | {{ resource }}"
+      ansible.netcommon.network_resource:
+        name: "{{ resource }}"
+        state: gathered
+      register: r_resource_config
+    
+    - name: Add to device configs
+      ansible.builtin.set_fact:
+        device_configs: "{{ device_configs | default({}) | combine({ resource: r_resource_config.gathered }) }}"
+  rescue:
+    - name: Notify config not found
+      ansible.builtin.debug:
+        msg: "{{ resource }} config not gathered for {{ inventory_hostname }} due to module error"

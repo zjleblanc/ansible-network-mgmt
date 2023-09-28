@@ -5,29 +5,17 @@
   tasks:
     - name: Check for stats
       block:
-        - name: Assert stats passed from vlan playbook
+        - name: Assert expected stats exist
           ansible.builtin.assert:
-            that: workflow_vlans is defined
+            that: workflow_config_reports is defined
       rescue:
-        - name: Set default value
+        - name: Set placeholder stat value
           ansible.builtin.set_fact:
-            workflow_vlans: []
-
-    - name: Debug set stats
-      ansible.builtin.debug:
-        var: workflow_vlans
+            workflow_config_reports: []
 
     - name: Post diff to slack
-      loop: "{{ workflow_vlans }}"
+      loop: "{{ workflow_config_reports }}"
       loop_control:
-        loop_var: vlan
-      ansible.builtin.uri:
-        url: https://slack.com/api/files.upload
-        method: POST
-        headers:
-          Authorization: "Bearer {{ slack_token }}"
-        body_format: form-multipart
-        body:
-          content: "{{ vlan.diff }}"
-          title: "VLAN changes for {{ vlan.hostname }}"
-          channels: "summit-connect-demo"
+        loop_var: device_report
+      ansible.builtin.include_tasks:
+        file: tasks/post_config_report.yml

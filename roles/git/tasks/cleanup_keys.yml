@@ -1,0 +1,5 @@
+---
+- name: Delete temp files
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/.ssh"
+    state: absent

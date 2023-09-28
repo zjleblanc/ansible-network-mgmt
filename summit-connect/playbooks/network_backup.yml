@@ -1,22 +1,81 @@
 ---
 - name: Retrieve network configurations
-  hosts: "all"
+  hosts: "{{ _hosts }}"
   gather_facts: false
 
-  tasks:
-    # fail with good error for Automation controller user
-    - name: Determine that both AAP and Machine credentials are set
-      assert:
-        that:
-          - "lookup('env', 'CONTROLLER_USERNAME') !=''"
-        fail_msg:
-          - "This Job requires two credentials"
-          - "Red Hat Ansible Automation Platform credential is not set"
-          - "Please assign correct credentials to the Job Template"
+  vars:
+    config_repo_name: "ansible-network-configs"
+    config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
+    config_dest: "{{ playbook_dir }}/{{ config_repo_name }}/backups/{{ inventory_hostname }}.config.yml"
 
-    - name: Determine that both AAP and Machine credentials are set
-      debug:
-        msg:
-          - "{{ lookup('env', 'CONTROLLER_USERNAME') }}"
-          - "{{ lookup('env', 'CONTROLLER_PASSWORD') }}"
-          - "{{ lookup('env', 'CONTROLLER_HOST') }}"
+  tasks:
+    - name: List resource modules
+      ansible.netcommon.network_resource:
+      register: r_net_modules
+
+    - name: Gather resource configs
+      loop: "{{ r_net_modules.modules }}"
+      loop_control:
+        loop_var: resource
+      ansible.builtin.include_tasks:
+        file: tasks/get_resource_config.yml
+
+    - name: Pull the config repo
+      run_once: true # noqa run-once[task]
+      ansible.builtin.include_role:
+        name: git
+        tasks_from: pull.yml
+        apply:
+          delegate_to: localhost
+      vars:
+        git_url: "{{ config_repo_url }}"
+        git_key: "{{ git_ssh_key }}"
+        git_branch: master
+
+    - name: Ensure dest directory exists
+      delegate_to: localhost
+      run_once: true # noqa run-once[task]
+      ansible.builtin.file:
+        name: "{{ config_dest | dirname }}"
+        state: directory
+        mode: "0755"
+
+    - name: Write the config to a file
+      delegate_to: localhost
+      ansible.builtin.copy:
+        content: "{{ device_configs | to_nice_yaml }}"
+        dest: "{{ config_dest }}"
+        mode: "0755"
+
+    - name: Set date fact
+      run_once: true # noqa run-once[task]
+      delegate_to: localhost
+      ansible.builtin.set_fact:
+        config_date: "{{ lookup('pipe', 'date +%Y.%m.%d.%H.%M.%S') }}"
+
+    - name: Publish the changes
+      run_once: true # noqa run-once[task]
+      ansible.builtin.include_role:
+        name: git
+        tasks_from: push.yml
+        apply:
+          delegate_to: localhost
+      vars:
+        git_url: "{{ config_repo_url }}"
+        git_key: "{{ git_ssh_key }}"
+        git_email: "ansible@summit.com"
+        git_username: ansible
+        git_branch: master
+        git_msg: >-
+          Network configuration backed up by ansible
+          on {{ config_date.split('.')[1] }}-{{ config_date.split('.')[0] }}-{{ config_date.split('.')[2] }}
+          @ {{ config_date.split('.')[3] }}:{{ config_date.split('.')[4] }}:{{ config_date.split('.')[5] }}
+        git_tag: "{{ config_date }}"
+        git_remove_local: true
+
+    - name: Set date stat
+      run_once: true # noqa run-once[task]
+      delegate_to: localhost
+      ansible.builtin.set_stats:
+        data:
+          backup_config_tag: "{{ config_date }}"
