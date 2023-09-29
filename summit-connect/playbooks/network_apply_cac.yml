@@ -3,7 +3,6 @@
   hosts: localhost
 
   vars:
-    config_repo_name: ansible-network-configs
     config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
 
   tasks:
@@ -17,12 +16,11 @@
         git_branch: master
 
 - name: Restore router configurations
-  hosts: "{{ ansible_limit }}"
+  hosts: "{{ _hosts }}"
   gather_facts: false
 
   vars:
-    config_repo_name: ansible-network-configs
-    config_path: "{{ playbook_dir }}/{{ config_repo_name }}/backups/{{ inventory_hostname }}.config.yml"
+    config_path: "{{ playbook_dir }}/{{ config_repo_name }}/configs/{{ inventory_hostname }}.config.yml"
 
   tasks:
     - name: Check for backup config
@@ -53,9 +51,6 @@
 
 - name: Cleanup backup repository
   hosts: localhost
-
-  vars:
-    config_repo_name: ansible-network-configs
 
   tasks:
     - name: Cleanup the repo
