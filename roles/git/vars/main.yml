@@ -1,0 +1,10 @@
+git_repo_root: "{{ playbook_dir }}{{ git_repo_path }}"
+git_changelog_path: "{{ git_repo_root }}/{{ git_changelog}}"
+git_status_lookup:
+  M: modified
+  T: file type changed (regular file, symbolic link or submodule)
+  A: added
+  D: deleted
+  R: renamed
+  C: copied (if config option status.renames is set to "copies")
+  U: updated but unmerged

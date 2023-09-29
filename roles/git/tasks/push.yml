@@ -9,30 +9,30 @@
 - name: Git add all new files
   ansible.builtin.shell: git add -A
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
 
 - name: Git status
-  ansible.builtin.shell: git status
+  ansible.builtin.shell: git status -s
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
   register: git_add_status
 
 - name: Git username
   when: git_username is defined
   ansible.builtin.shell: git config user.name "{{ git_username }}"
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
 
 - name: Git email
   when: git_email is defined
   ansible.builtin.shell: git config user.email "{{ git_email }}"
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
 
 - name: Git commit
   ansible.builtin.shell: git commit -a -m "{{ git_msg }}"
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
   ignore_errors: true
   register: git_commit
 
@@ -46,7 +46,7 @@
   when: git_commit is not failed
   ansible.builtin.shell: git push --force
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
   environment:
     GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
 
@@ -56,9 +56,19 @@
     - git_tag is defined
   ansible.builtin.shell: git tag {{ git_tag|default('ansible') }} {{ git_branch }} && git push origin {{ git_tag|default('ansible') }}
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
   environment:
     GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
+  register: r_git_tag
+
+- name: Git changelog entry
+  when: 
+    - git_changelog is defined
+    - r_git_tag is defined
+    - r_git_tag is not failed
+  ansible.builtin.template:
+    src: CHANGELOG.md.j2
+    dest: "{{ git_changelog_path | default('/tmp/' + git_changelog) }}"
 
 - name: Git list tags
   when:
@@ -66,7 +76,7 @@
     - git_tag is defined
   ansible.builtin.shell: git tag -l
   args:
-    chdir: "{{ playbook_dir }}{{ git_repo_path }}"
+    chdir: "{{ git_repo_root }}"
   register: git_tag_list_raw
 
 - name: Set tag list for survey
@@ -76,7 +86,7 @@
 
 - name: Cleanup local repo
   when: git_remove_local
-  ansible.builtin.shell: rm -rf {{ playbook_dir }}{{ git_repo_path }}
+  ansible.builtin.shell: rm -rf {{ git_repo_root }}
   register: git_cleanup_repo
 
 - name: Cleanup keys

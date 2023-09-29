@@ -71,6 +71,7 @@
           on {{ config_date.split('.')[1] }}-{{ config_date.split('.')[0] }}-{{ config_date.split('.')[2] }}
           @ {{ config_date.split('.')[3] }}:{{ config_date.split('.')[4] }}:{{ config_date.split('.')[5] }}
         git_tag: "{{ config_date }}"
+        git_changelog: CHANGELOG.md
         git_remove_local: true
 
     - name: Update Network Restore survey options
