@@ -20,7 +20,7 @@
 - name: Git changelog entry
   when: 
     - git_changelog is defined
-    - git_tag is defined
+    - git_push_tag is defined
     - git_add_status.stdout_lines|length > 0
   ansible.builtin.template:
     src: CHANGELOG.md.j2
@@ -62,18 +62,18 @@
 - name: Git tag
   when:
     - git_commit is not failed
-    - git_tag is defined
-  ansible.builtin.shell: git tag {{ git_tag|default('ansible') }} {{ git_branch }} && git push origin {{ git_tag|default('ansible') }}
+    - git_push_tag is defined
+  ansible.builtin.shell: git tag {{ git_push_tag|default('ansible') }} {{ git_branch }} && git push origin {{ git_push_tag|default('ansible') }}
   args:
     chdir: "{{ git_repo_root }}"
   environment:
     GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
-  register: r_git_tag
+  register: r_git_push_tag
 
 - name: Git list tags
   when:
     - git_commit is not failed
-    - git_tag is defined
+    - git_push_tag is defined
   ansible.builtin.shell: git tag -l
   args:
     chdir: "{{ git_repo_root }}"

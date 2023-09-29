@@ -1,10 +1,34 @@
 ---
-- name: Retrieve network configurations
+- name: Pull backup repository
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
+
+  tasks:
+    - name: Pull the config repo
+      ansible.builtin.include_role:
+        name: git
+        tasks_from: pull.yml
+      vars:
+        git_url: "{{ config_repo_url }}"
+        git_key: "{{ git_ssh_key }}"
+        git_branch: master
+
+    - name: Ensure dest directory exists
+      delegate_to: localhost
+      run_once: true # noqa run-once[task]
+      ansible.builtin.file:
+        name: "{{ config_repo_url }}/backups"
+        state: directory
+        mode: "0755"
+
+- name: Backup network configurations
   hosts: "{{ _hosts }}"
   gather_facts: false
 
   vars:
-    config_repo_name: "ansible-network-configs"
     config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
     config_dest: "{{ playbook_dir }}/{{ config_repo_name }}/backups/{{ inventory_hostname }}.config.yml"
 
@@ -20,26 +44,6 @@
       ansible.builtin.include_tasks:
         file: tasks/get_resource_config.yml
 
-    - name: Pull the config repo
-      run_once: true # noqa run-once[task]
-      ansible.builtin.include_role:
-        name: git
-        tasks_from: pull.yml
-        apply:
-          delegate_to: localhost
-      vars:
-        git_url: "{{ config_repo_url }}"
-        git_key: "{{ git_ssh_key }}"
-        git_branch: master
-
-    - name: Ensure dest directory exists
-      delegate_to: localhost
-      run_once: true # noqa run-once[task]
-      ansible.builtin.file:
-        name: "{{ config_dest | dirname }}"
-        state: directory
-        mode: "0755"
-
     - name: Write the config to a file
       delegate_to: localhost
       ansible.builtin.copy:
@@ -47,19 +51,22 @@
         dest: "{{ config_dest }}"
         mode: "0755"
 
+- name: Publish backups
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
+
+  tasks:
     - name: Set date fact
-      run_once: true # noqa run-once[task]
-      delegate_to: localhost
       ansible.builtin.set_fact:
         config_date: "{{ lookup('pipe', 'date +%Y.%m.%d.%H.%M.%S') }}"
 
     - name: Publish the changes
-      run_once: true # noqa run-once[task]
       ansible.builtin.include_role:
         name: git
         tasks_from: push.yml
-        apply:
-          delegate_to: localhost
       vars:
         git_url: "{{ config_repo_url }}"
         git_key: "{{ git_ssh_key }}"
@@ -70,14 +77,12 @@
           Network configuration backed up by ansible
           on {{ config_date.split('.')[1] }}-{{ config_date.split('.')[0] }}-{{ config_date.split('.')[2] }}
           @ {{ config_date.split('.')[3] }}:{{ config_date.split('.')[4] }}:{{ config_date.split('.')[5] }}
-        git_tag: "{{ config_date }}"
+        git_push_tag: "{{ config_date }}"
         git_changelog: CHANGELOG.md
         git_remove_local: true
 
     - name: Update Network Restore survey options
       when: git_tag_list is defined
-      run_once: true # noqa run-once[task]
-      delegate_to: localhost
       ansible.controller.job_template:
         name: Summit Connect // Network Restore
         organization: Autodotes
@@ -103,9 +108,7 @@
           - Git Role Credential
           - Controller Credential
 
-    - name: Set date stat
-      run_once: true # noqa run-once[task]
-      delegate_to: localhost
+    - name: Stat backup config tag
       ansible.builtin.set_stats:
         data:
           backup_config_tag: "{{ config_date }}"

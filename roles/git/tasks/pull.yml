@@ -12,6 +12,7 @@
     dest: "{{ playbook_dir }}/{{ git_repo_path }}"
     accept_hostkey: yes
     key_file: "{{ git_temp_file.path }}"
+    version: "{{ git_pull_tag | default(omit) }}"
 
 - name: Cleanup keys
   ansible.builtin.include_tasks: cleanup_keys.yml

@@ -1,7 +1,9 @@
 ---
-- name: Restore router configurations
-  hosts: "{{ _hosts }}"
-  gather_facts: false
+- name: Pull backup repository
+  hosts: localhost
+
+  vars:
+    config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
 
   tasks:
     - name: Confirm the backup_config_tag is set
@@ -9,3 +11,56 @@
         that: backup_config_tag is defined
         fail_msg: "No 'backup_config_tag' was defined, required for choosing restore point"
         success_msg: "using backup_config_tag => {{ backup_config_tag | default('undef') }}"
+
+    - name: Pull the config repo
+      ansible.builtin.include_role:
+        name: git
+        tasks_from: pull.yml
+      vars:
+        git_url: "{{ config_repo_url }}"
+        git_key: "{{ git_ssh_key }}"
+        git_branch: master
+        git_pull_tag: "{{ backup_config_tag }}"
+
+- name: Restore router configurations
+  hosts: "{{ _hosts }}"
+  gather_facts: false
+
+  vars:
+    config_path: "{{ playbook_dir }}/{{ config_repo_name }}/backups/{{ inventory_hostname }}.config.yml"
+
+  tasks:
+    - name: Check for backup config
+      ansible.builtin.stat:
+        path: "{{ config_path }}"
+      register: r_config_path
+
+    - name: Notify when backup does not exist
+      when: not r_config_path.stat.exists
+      ansible.builtin.debug:
+        msg: "No backup exists for {{ inventory_hostname }} at expected path: {{ config_path }}"
+
+    - name: Restore device configs from the backup
+      when: r_config_path.stat.exists
+      block:
+        - name: Apply resource config
+          when: 
+            - resource.value != {}
+            - resource.value != []
+          loop: "{{ lookup('file', config_path) | from_yaml | dict2items }}"
+          loop_control:
+            loop_var: resource
+            label: "{{ resource.key }}"
+          ansible.netcommon.network_resource:
+            name: "{{ resource.key }}"
+            config: "{{ resource.value }}"
+            state: overridden
+
+- name: Cleanup backup repository
+  hosts: localhost
+
+  tasks:
+    - name: Cleanup the repo
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/{{ config_repo_name }}"
+        state: absent

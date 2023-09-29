@@ -23,7 +23,8 @@ Role Variables
 | git_key | default |  |
 | git_branch | default | master |
 | git_msg | default | update files with ansible |
-| git_tag | default | |
+| git_push_tag | default | |
+| git_pull_tag | default | |
 | git_changelog | default | false |
 | git_remove_local | default | false |
 | git_username | default | ansible_git |
