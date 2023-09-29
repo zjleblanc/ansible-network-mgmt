@@ -6,6 +6,6 @@
 | --- | --- |
 {% for line in git_add_status.stdout_lines %}
 | {{ line.split(' ')[-1] }} | {{ git_status_lookup[line[0]] }} |
-{% endfor}
+{% endfor %}
 
 {{ lookup('file', git_changelog_path) }}

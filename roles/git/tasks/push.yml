@@ -17,6 +17,15 @@
     chdir: "{{ git_repo_root }}"
   register: git_add_status
 
+- name: Git changelog entry
+  when: 
+    - git_changelog is defined
+    - git_tag is defined
+    - git_add_status.stdout_lines|length > 0
+  ansible.builtin.template:
+    src: CHANGELOG.md.j2
+    dest: "{{ git_changelog_path | default('/tmp/' + git_changelog) }}"
+
 - name: Git username
   when: git_username is defined
   ansible.builtin.shell: git config user.name "{{ git_username }}"
@@ -30,7 +39,7 @@
     chdir: "{{ git_repo_root }}"
 
 - name: Git commit
-  ansible.builtin.shell: git commit -a -m "{{ git_msg }}"
+  ansible.builtin.shell: git add -A && git commit -m "{{ git_msg }}"
   args:
     chdir: "{{ git_repo_root }}"
   ignore_errors: true
@@ -61,15 +70,6 @@
     GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
   register: r_git_tag
 
-- name: Git changelog entry
-  when: 
-    - git_changelog is defined
-    - r_git_tag is defined
-    - r_git_tag is not failed
-  ansible.builtin.template:
-    src: CHANGELOG.md.j2
-    dest: "{{ git_changelog_path | default('/tmp/' + git_changelog) }}"
-
 - name: Git list tags
   when:
     - git_commit is not failed
@@ -80,7 +80,9 @@
   register: git_tag_list_raw
 
 - name: Set tag list for survey
-  when: git_tag_list_raw is not failed
+  when: 
+    - git_tag_list_raw is defined
+    - git_tag_list_raw.stdout_lines is defined
   ansible.builtin.set_fact:
     git_tag_list: "{{ git_tag_list_raw.stdout_lines }}"
 
