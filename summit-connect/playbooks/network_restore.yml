@@ -4,6 +4,8 @@
   gather_facts: false
 
   tasks:
-    - name: TODO
-      ansible.builtin.debug:
-        msg: "Work in progress"
+    - name: Confirm the backup_config_tag is set
+      ansible.builtin.assert:
+        that: backup_config_tag is defined
+        fail_msg: "No 'backup_config_tag' was defined, required for choosing restore point"
+        success_msg: "using backup_config_tag => {{ backup_config_tag | default('undef') }}"

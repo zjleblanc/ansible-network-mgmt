@@ -9,7 +9,7 @@
         - description: MANAGEMENT INTERFACE - DON'T TOUCH ME
           enabled: true
           name: GigabitEthernet1
-        - description: Port to Fabric (edit 2 -> ansible)
+        - description: Port to Fabric (edit 4 -> ansible)
           enabled: true
           name: GigabitEthernet2
 
@@ -20,10 +20,9 @@
         fail_msg: "no 'network_configs' was sent, please send a valid configuration set as the variable network_configs"
         success_msg: "all assertions passed"
 
-    - name: Transform network_configs into dictionary if coming from controller
-      when: network_configs is string
+    - name: Transform network_configs into dictionary
       ansible.builtin.set_fact:
-        network_configs_safe: "{{ network_configs | from_yaml }}"
+        network_configs_safe: "{{ (network_configs is string) | ternary(network_configs | from_yaml, network_configs) }}"
 
     - name: Set each config
       when: ansible_network_os is defined

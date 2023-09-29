@@ -60,11 +60,19 @@
   environment:
     GIT_SSH: "{{ playbook_dir }}/.ssh/ssh"
 
-- name: Git status
-  ansible.builtin.shell: git status
+- name: Git list tags
+  when:
+    - git_commit is not failed
+    - git_tag is defined
+  ansible.builtin.shell: git tag -l
   args:
     chdir: "{{ playbook_dir }}{{ git_repo_path }}"
-  register: git_add_status
+  register: git_tag_list_raw
+
+- name: Set tag list for survey
+  when: git_tag_list_raw is not failed
+  ansible.builtin.set_fact:
+    git_tag_list: "{{ git_tag_list_raw.stdout_lines }}"
 
 - name: Cleanup local repo
   when: git_remove_local

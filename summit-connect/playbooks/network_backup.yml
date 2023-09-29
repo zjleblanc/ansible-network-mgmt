@@ -73,6 +73,35 @@
         git_tag: "{{ config_date }}"
         git_remove_local: true
 
+    - name: Update Network Restore survey options
+      when: git_tag_list is defined
+      run_once: true # noqa run-once[task]
+      delegate_to: localhost
+      ansible.controller.job_template:
+        name: Summit Connect // Network Restore
+        organization: Autodotes
+        job_type: run
+        inventory: Cisco Lab
+        project: Network Management
+        playbook: summit-connect/playbooks/network_restore.yml
+        execution_environment: ee-networking
+        ask_variables_on_launch: true
+        survey_enabled: yes
+        survey_spec:
+          name: Network Restore Survey
+          description: Prompt user for restore point based on backup configs available in git
+          spec:
+            - question_name: "Choose your restore point (git tag)"
+              question_description: "Each backup commit is tagged with the time it was created"
+              variable: backup_config_tag
+              type: "multiplechoice"
+              choices: "{{ git_tag_list | default(['undef']) }}"
+              default: "{{ git_tag_list[0] }}"
+              required: true
+        credentials:
+          - Git Role Credential
+          - Controller Credential
+
     - name: Set date stat
       run_once: true # noqa run-once[task]
       delegate_to: localhost
