@@ -1,9 +1,10 @@
 ---
-- name: Configure network ACLs
+- name: Configure network resources
   hosts: "{{ _hosts }}"
   gather_facts: false
 
   vars:
+    # Example input (should override)
     network_configs:
       interfaces:
         - description: MANAGEMENT INTERFACE - DON'T TOUCH ME
