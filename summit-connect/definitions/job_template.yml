@@ -1,10 +1,13 @@
 job_templates:
--   name: Summit Connect // VLAN Slack Notification
+-   name: Summit Connect // Slack Notification
     organization: Autodotes
     job_type: run
     inventory: Cisco Lab
     project: Network Management
     playbook: summit-connect/playbooks/slack_notification.yml
+    ask_variables_on_launch: true
+    extra_vars:
+      config_repo_name: "{{ config_repo_name | default('ansible-network-configs') }}"
     credentials:
       - "{{ slack_credential.name }}"
 
@@ -15,7 +18,11 @@ job_templates:
     project: Network Management
     playbook: summit-connect/playbooks/network_backup.yml
     ask_limit_on_launch: true
+    ask_variables_on_launch: true
+    extra_vars:
+      config_repo_name: "{{ config_repo_name | default('ansible-network-configs') }}"
     credentials:
+      - Git Role Credential
       - Controller Credential
 
 -   name: Summit Connect // Network Restore
@@ -25,14 +32,41 @@ job_templates:
     project: Network Management
     playbook: summit-connect/playbooks/network_restore.yml
     ask_limit_on_launch: true
+    ask_variables_on_launch: true
+    extra_vars:
+      config_repo_name: "{{ config_repo_name | default('ansible-network-configs') }}"
     credentials:
+      - Git Role Credential
       - Controller Credential
       
--   name: Summit Connect //  Network VLANs
+-   name: Summit Connect //  Network Apply Configs
     organization: Autodotes
     job_type: run
     inventory: Cisco Lab
     project: Network Management
-    playbook: summit-connect/playbooks/network_vlans.yml
+    playbook: summit-connect/playbooks/network_apply_config.yml
     ask_limit_on_launch: true
+    ask_variables_on_launch: true
+    limit: sandbox-iosxe-latest-1.cisco.com
+    extra_vars:
+      network_configs:
+        interfaces:
+          - description: MANAGEMENT INTERFACE - DON'T TOUCH ME
+            enabled: true
+            name: GigabitEthernet1
+          - description: Port to Fabric (edited by ansible)
+            enabled: true
+            name: GigabitEthernet2
     credentials: []
+
+-   name: Summit Connect // Apply Network CaC
+    organization: Autodotes
+    job_type: run
+    inventory: Cisco Lab
+    project: Network Management
+    playbook: summit-connect/playbooks/network_apply_cac.yml
+    ask_limit_on_launch: true
+    ask_variables_on_launch: true
+    limit: sandbox-iosxe-latest-1.cisco.com
+    credentials:
+      - Git Role Credential
