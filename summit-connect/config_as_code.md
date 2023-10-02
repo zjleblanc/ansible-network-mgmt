@@ -10,6 +10,8 @@ There is one playbook in this repository for applying configuration as code to d
 
 ## E2E Process
 
+![Process Diagram](/.attachments/NetworkCaC.png)
+
 When a pull request is merged to the master branch of [ansible-network-configs](https://github.com/zjleblanc/ansible-network-configs), a workflow is launched automatically. The first part of the workflow detects changes to configuration files and will launch the config-as-code playbook, passing a comma-delimited lists of hosts via the `{{ _hosts }}` variable with changes to be applied. Below is an example of a successful workflow execution:
 
 ### GitHub Workflow Run
