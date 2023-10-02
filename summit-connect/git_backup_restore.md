@@ -4,7 +4,7 @@ The playbooks described are intended to establish a process for backing up netwo
 
 ## Process Diagram
 
-![Process Diagram](/.attachments/GitBackupAndRestore.png)
+![Process Diagram](/.attachments/GitBackupandRestore.png)
 
 ## Playbooks
 
