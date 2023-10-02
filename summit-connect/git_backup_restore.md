@@ -2,6 +2,10 @@
 
 The playbooks described are intended to establish a process for backing up networking configurations and defining a workflow to automatically restore from a specified backup.
 
+## Process Diagram
+
+![Process Diagram](/.attachments/GitBackupAndRestore.png)
+
 ## Playbooks
 
 | Name | Description |
