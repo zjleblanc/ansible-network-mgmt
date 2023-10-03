@@ -101,8 +101,8 @@
               question_description: "Each backup commit is tagged with the time it was created"
               variable: backup_config_tag
               type: "multiplechoice"
-              choices: "{{ git_tag_list | default(['undef']) }}"
-              default: "{{ git_tag_list[-1] }}"
+              choices: "{{ git_tag_list | default(['undef']) | reverse | list }}"
+              default: "{{ git_tag_list[0] }}"
               required: true
         credentials:
           - Git Role Credential
