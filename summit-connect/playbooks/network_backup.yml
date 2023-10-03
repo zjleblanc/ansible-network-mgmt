@@ -107,7 +107,7 @@
               variable: backup_config_tag
               type: "multiplechoice"
               choices: "{{ git_tag_list | default(['undef']) | reverse | list }}"
-              default: "{{ git_tag_list[0] }}"
+              default: "{{ git_tag_list[-1] }}"
               required: true
         credentials:
           - Git Role Credential
