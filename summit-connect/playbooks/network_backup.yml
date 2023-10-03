@@ -100,7 +100,7 @@
             - question_name: "Specify target hosts"
               variable: _hosts
               type: "text"
-              default: "{{ git_tag_list[0] }}"
+              default: "sandbox-iosxe-latest-1.cisco.com"
               required: true
             - question_name: "Choose your restore point (git tag)"
               question_description: "Each backup commit is tagged with the time it was created"
