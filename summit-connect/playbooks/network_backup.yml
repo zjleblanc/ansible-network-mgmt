@@ -97,6 +97,11 @@
           name: Network Restore Survey
           description: Prompt user for restore point based on backup configs available in git
           spec:
+            - question_name: "Specify target hosts"
+              variable: _hosts
+              type: "text"
+              default: "{{ git_tag_list[0] }}"
+              required: true
             - question_name: "Choose your restore point (git tag)"
               question_description: "Each backup commit is tagged with the time it was created"
               variable: backup_config_tag
