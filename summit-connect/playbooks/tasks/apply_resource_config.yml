@@ -1,0 +1,16 @@
+---
+- name: "Try apply resource config | {{ resource.key }}"
+  block:
+    - name: "Apply resource config | {{ resource.key }}"
+      when: 
+        - resource.value != {}
+        - resource.value != []
+      register: _r_apply_config
+      ansible.netcommon.network_resource:
+        name: "{{ resource.key }}"
+        config: "{{ resource.value }}"
+        state: overridden
+  rescue:
+    - name: Notify apply config failure
+      ansible.builtin.debug:
+        msg: "{{ resource.key }} config not applied for {{ inventory_hostname }} due to error: {{ _r_apply_config.msg | default('UNKNOWN ERROR') }}"

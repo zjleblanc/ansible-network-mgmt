@@ -51,10 +51,8 @@
           loop_control:
             loop_var: resource
             label: "{{ resource.key }}"
-          ansible.netcommon.network_resource:
-            name: "{{ resource.key }}"
-            config: "{{ resource.value }}"
-            state: overridden
+          ansible.builtin.include_tasks:
+            file: tasks/apply_resource_config.yml
 
 - name: Cleanup backup repository
   hosts: localhost
