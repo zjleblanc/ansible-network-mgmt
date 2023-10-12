@@ -1,22 +1,22 @@
 ---
-- name: Set group config path
+- name: "Set group config path | {{ group_name }}"
   ansible.builtin.set_fact:
     group_config_path: "{{ configs_dir }}/{{ group_name }}.config.yml"
 
-- name: Check for backup config
+- name: "Check for group config | {{ group_name }}"
   ansible.builtin.stat:
     path: "{{ group_config_path }}"
   register: r_group_config_path
 
-- name: Notify when backup does not exist
+- name: "Notify when group config does not exist | {{ group_name }}"
   when: not r_group_config_path.stat.exists
   ansible.builtin.debug:
     msg: "No backup exists for {{ group_name }} at expected path: {{ group_config_path }}"
 
-- name: Restore device configs from the backup
+- name: "Apply group configs | {{ group_name }}"
   when: r_group_config_path.stat.exists
   block:
-    - name: Apply resource config
+    - name: "Apply resource specific config"
       when: 
         - resource.value != {}
         - resource.value != []

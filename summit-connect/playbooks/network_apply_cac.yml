@@ -42,20 +42,20 @@
     config_path: "{{ playbook_dir }}/{{ config_repo_name }}/configs/{{ inventory_hostname }}.config.yml"
 
   tasks:
-    - name: Check for backup config
+    - name: Check for host config
       ansible.builtin.stat:
         path: "{{ config_path }}"
       register: r_config_path
 
-    - name: Notify when backup does not exist
+    - name: Notify when host config does not exist
       when: not r_config_path.stat.exists
       ansible.builtin.debug:
-        msg: "No backup exists for {{ inventory_hostname }} at expected path: {{ config_path }}"
+        msg: "No host config exists for {{ inventory_hostname }} at expected path: {{ config_path }}"
 
-    - name: Restore device configs from the backup
+    - name: Apply host configs
       when: r_config_path.stat.exists
       block:
-        - name: Apply resource config
+        - name: "Apply resource specific config"
           when: 
             - resource.value != {}
             - resource.value != []

@@ -11,6 +11,6 @@
         config: "{{ resource.value }}"
         state: overridden
   rescue:
-    - name: Notify apply config failure
+    - name: "Notify apply config failure | {{ resource.key }}"
       ansible.builtin.debug:
         msg: "{{ resource.key }} config not applied for {{ inventory_hostname }} due to error: {{ _r_apply_config.msg | default('UNKNOWN ERROR') }}"
