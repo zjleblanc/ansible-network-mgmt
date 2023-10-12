@@ -27,4 +27,4 @@
       ansible.netcommon.network_resource:
         name: "{{ resource.key }}"
         config: "{{ resource.value }}"
-        state: overridden
+        state: merged
