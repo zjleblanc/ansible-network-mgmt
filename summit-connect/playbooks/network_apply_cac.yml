@@ -15,8 +15,27 @@
         git_key: "{{ git_ssh_key }}"
         git_branch: master
 
-- name: Restore router configurations
-  hosts: "{{ _hosts }}"
+- name: Apply group configurations
+  hosts: "{{ (_groups | length) | ternary(_groups, omit) }}"
+  gather_facts: false
+
+  vars:
+    configs_dir: "{{ playbook_dir }}/{{ config_repo_name }}/configs/groups"
+
+  tasks:
+    - name: Get groups with config changes
+      ansible.builtin.set_fact:
+        groups_with_changes: "{{ group_names | intersect(_groups) }}"
+
+    - name: Apply group config changes
+      loop: "{{ group_names | intersect(_groups) }}"
+      loop_control:
+        loop_var: group_name
+      ansible.builtin.include_tasks:
+        file: tasks/apply_group_config.yml
+
+- name: Apply host specific configurations
+  hosts: "{{ (_hosts | length) | ternary(_hosts, omit) }}"
   gather_facts: false
 
   vars:
