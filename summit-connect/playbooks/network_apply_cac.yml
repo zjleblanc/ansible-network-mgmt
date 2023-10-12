@@ -39,7 +39,7 @@
   gather_facts: false
 
   vars:
-    config_path: "{{ playbook_dir }}/{{ config_repo_name }}/configs/{{ inventory_hostname }}.config.yml"
+    config_path: "{{ playbook_dir }}/{{ config_repo_name }}/configs/hosts/{{ inventory_hostname }}.config.yml"
 
   tasks:
     - name: Check for host config
