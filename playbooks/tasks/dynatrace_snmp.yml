@@ -1,0 +1,44 @@
+---
+- name: Create OAuth Query
+  ansible.builtin.set_fact:
+    oauth_query:
+      - grant_type=client_credentials
+      - "client_id={{ lookup('env', 'DYNATRACE_CLIENT_ID') }}"
+      - "client_secret={{ lookup('env', 'DYNATRACE_CLIENT_SECRET') }}"
+      - "scope={{ 'storage:entities:read' | urlencode }}"
+
+- name: Get an OAuth token
+  register: r_dynatrace_oauth
+  ansible.builtin.uri:
+    url: "https://sso.dynatrace.com/sso/oauth2/token"
+    method: POST
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    body: "{{ oauth_query | join('&') }}"
+
+- name: Get request token
+  register: r_dynatrace_request
+  ansible.builtin.uri:
+    url: https://otv67502.apps.dynatrace.com/platform/storage/query/v1/query:execute
+    method: POST
+    headers:
+      Authorization: "Bearer {{ r_dynatrace_oauth.json.access_token }}"
+    body_format: json
+    status_code: [200, 202]
+    body:
+      query: "fetch `dt.entity.palo-alto:device-attributes` | fieldsAdd id, DevicePort, tags"
+
+- name: Execute query
+  register: r_dynatrace_query
+  ansible.builtin.uri:
+    url: https://otv67502.apps.dynatrace.com/platform/storage/query/v1/query:poll?request-token={{ r_dynatrace_request.json.requestToken | urlencode}}&request-timeout-milliseconds=120
+    method: GET
+    headers:
+      Authorization: "Bearer {{r_dynatrace_oauth.json.access_token }}"
+
+- name: Write to file for demo
+  ansible.builtin.copy:
+    content: "{{ r_dynatrace_query.json.result.records | to_nice_json }}"
+    dest: files/dynatrace.out.json
+
+- meta: end_play
