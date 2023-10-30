@@ -37,7 +37,7 @@
 
     - name: Create list of locations
       ansible.builtin.set_fact:
-        palo_locations: "{{ r_palo_devices.results | json_query('[].record.location') }}"
+        palo_locations: "{{ r_palo_devices.results | json_query('[].record.location') | new_locations }}"
 
     - name: Create locations # noqa ignore-errors
       loop: "{{ palo_locations }}"
@@ -47,3 +47,9 @@
         action: post
         data:
           name: "{{ item }}"
+
+    - name: Create locations
+      ansible.builtin.include_role:
+        name: mgmt.snow_configuration.records
+      vars:
+        snow_records: "{{ palo_locations }}"
