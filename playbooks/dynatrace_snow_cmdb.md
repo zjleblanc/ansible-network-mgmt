@@ -2,6 +2,11 @@
 
 Combining Ansible with Dynatrace SNMP, you can quickly implement automation to populate your CMDB with network infrastructure components. In this example, we use a simple DQL (Dynatrace Query Language) expression to pull data from the Dynatrace API and create ServiceNow CMDB records. The implementation consists of a single Ansible playbook with < 10 tasks.
 
+## Custom Credential Types
+
+- [ServiceNow Credential](https://docs.autodotes.com/Ansible/Credential%20Types/service_now/)
+- [Dynatrace Credential](https://docs.autodotes.com/Ansible/Credential%20Types/dynatrace/)
+
 ## Main Playbook
 
 The initial playbook [(found here)](./dynatrace_snow_cmdb.yml) contains the following steps:
