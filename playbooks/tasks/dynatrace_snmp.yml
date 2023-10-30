@@ -19,7 +19,7 @@
 - name: Get request token
   register: r_dynatrace_request
   ansible.builtin.uri:
-    url: https://otv67502.apps.dynatrace.com/platform/storage/query/v1/query:execute
+    url: "{{ lookup('env', 'DYNATRACE_HOST') }}/platform/storage/query/v1/query:execute"
     method: POST
     headers:
       Authorization: "Bearer {{ r_dynatrace_oauth.json.access_token }}"
@@ -28,17 +28,18 @@
     body:
       query: "fetch `dt.entity.palo-alto:device-attributes` | fieldsAdd id, DevicePort, tags"
 
-- name: Execute query
+- name: Build query params
+  ansible.builtin.set_fact:
+    _exec_query_params: "request-token={{ r_dynatrace_request.json.requestToken | urlencode }}&request-timeout-milliseconds=120"
+
+- name: Execute query # noqa yaml[line-length]
   register: r_dynatrace_query
   ansible.builtin.uri:
-    url: https://otv67502.apps.dynatrace.com/platform/storage/query/v1/query:poll?request-token={{ r_dynatrace_request.json.requestToken | urlencode}}&request-timeout-milliseconds=120
+    url: "{{ lookup('env', 'DYNATRACE_HOST') }}/platform/storage/query/v1/query:poll?request-token={{ _exec_query_params }}"
     method: GET
     headers:
-      Authorization: "Bearer {{r_dynatrace_oauth.json.access_token }}"
+      Authorization: "Bearer {{ r_dynatrace_oauth.json.access_token }}"
 
-- name: Write to file for demo
-  ansible.builtin.copy:
-    content: "{{ r_dynatrace_query.json.result.records | to_nice_json }}"
-    dest: files/dynatrace.out.json
-
-- meta: end_play
+- name: Store Palo device facts
+  ansible.builtin.set_fact:
+    palo_device_data: "{{ r_dynatrace_query.json }}"

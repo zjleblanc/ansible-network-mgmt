@@ -11,13 +11,6 @@
     palo_device_data: "{{ lookup('file', 'files/palo_device_data.json') | from_json }}"
 
   tasks:
-    - name: Get data from Dynatrace
-      when: use_dynatrace | default(false)
-      ansible.builtin.include_tasks:
-        file: tasks/dynatrace_snmp.yml
-        apply:
-          no_log: true
-
     - name: Add Cisco Devices
       when:
         - cisco_device_data['state'] == 'SUCCEEDED'

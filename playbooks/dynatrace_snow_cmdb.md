@@ -4,7 +4,7 @@ Combining Ansible with Dynatrace SNMP, you can quickly implement automation to p
 
 ## Main Playbook
 
-The initial playbook [(found here)](./populate_snow_cmdb.yml) contains the following steps:
+The initial playbook [(found here)](./dynatrace_snow_cmdb.yml) contains the following steps:
 
 1. Get data from Dynatrace API (the demo loads static data from a file for simplicity)
 1. Loop over Cisco records and insert into ServiceNow CMDB

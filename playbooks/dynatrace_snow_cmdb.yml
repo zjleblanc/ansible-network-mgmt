@@ -1,0 +1,50 @@
+---
+- name: Populate Service Now CMDB with Network Devices
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  vars:
+    record_limit: 5
+
+  tasks:
+    - name: Get data from Dynatrace
+      ansible.builtin.include_tasks:
+        file: tasks/dynatrace_snmp.yml
+        apply:
+          no_log: true
+
+    - name: Add Palo Devices
+      when:
+        - palo_device_data['state'] == 'SUCCEEDED'
+        - palo_device_data['result']['records'] | length > 0
+      loop: "{{ palo_device_data['result']['records'][:record_limit] }}"
+      loop_control:
+        loop_var: dev
+        label: "{{ dev['id'] }}"
+      register: r_palo_devices
+      servicenow.itsm.configuration_item:
+        sys_class_name: cmdb_ci_vm_object
+        name: "{{ dev['id'] }}"
+        short_description: "{{ dev['entity.name'] }}, port {{ dev['DevicePort'] }}, (populated by ansible)"
+        ip_address: "{{ dev['entity.name'] }}"
+        category: Palo Alto Network Device
+        other:
+          object_id: "{{ dev['id'] }}"
+          discovery_source: "Dynatrace + Ansible"
+          location: "{{ dev | find_location }}"
+
+    - name: Create list of locations
+      ansible.builtin.set_fact:
+        cisco_locations: "{{ r_cisco_devices.results | json_query('[].record.location') }}"
+        generic_locations: "{{ r_generic_devices.results | json_query('[].record.location') }}"
+        palo_locations: "{{ r_palo_devices.results | json_query('[].record.location') }}"
+
+    - name: Create locations # noqa ignore-errors
+      loop: "{{ cisco_locations | union(generic_locations) | union(palo_locations) | list }}"
+      ignore_errors: true
+      servicenow.itsm.api:
+        resource: cmn_location
+        action: post
+        data:
+          name: "{{ item }}"
