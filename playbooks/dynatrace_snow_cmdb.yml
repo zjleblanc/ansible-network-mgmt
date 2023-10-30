@@ -39,16 +39,16 @@
       ansible.builtin.set_fact:
         palo_locations: "{{ r_palo_devices.results | json_query('[].record.location') | new_locations }}"
 
-    - name: Create locations # noqa ignore-errors
-      loop: "{{ palo_locations }}"
-      ignore_errors: true
-      servicenow.itsm.api:
-        resource: cmn_location
-        action: post
-        data:
-          name: "{{ item }}"
+    # - name: Create locations # noqa ignore-errors
+    #   loop: "{{ palo_locations }}"
+    #   ignore_errors: true
+    #   servicenow.itsm.api:
+    #     resource: cmn_location
+    #     action: post
+    #     data:
+    #       name: "{{ item }}"
 
-    - name: Create locations
+    - name: Create locations (idempotent wrapper)
       ansible.builtin.include_role:
         name: mgmt.snow_configuration.records
       vars:
