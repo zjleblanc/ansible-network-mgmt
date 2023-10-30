@@ -34,12 +34,16 @@
 
 - name: Execute query # noqa yaml[line-length]
   register: r_dynatrace_query
+  retries: 3
+  delay: 30
+  until: r_dynatrace_query.json.state == 'SUCCEEDED'
   ansible.builtin.uri:
-    url: "{{ lookup('env', 'DYNATRACE_HOST') }}/platform/storage/query/v1/query:poll?request-token={{ _exec_query_params }}"
+    url: "{{ lookup('env', 'DYNATRACE_HOST') }}/platform/storage/query/v1/query:poll?{{ _exec_query_params }}"
     method: GET
     headers:
       Authorization: "Bearer {{ r_dynatrace_oauth.json.access_token }}"
 
 - name: Store Palo device facts
+  no_log: false
   ansible.builtin.set_fact:
     palo_device_data: "{{ r_dynatrace_query.json }}"

@@ -6,13 +6,14 @@
 
   vars:
     record_limit: 5
+    dynatrace_debug: false
 
   tasks:
     - name: Get data from Dynatrace
       ansible.builtin.include_tasks:
         file: tasks/dynatrace_snmp.yml
         apply:
-          no_log: true
+          no_log: "{{ not dynatrace_debug }}"
 
     - name: Add Palo Devices
       when:
@@ -36,12 +37,10 @@
 
     - name: Create list of locations
       ansible.builtin.set_fact:
-        cisco_locations: "{{ r_cisco_devices.results | json_query('[].record.location') }}"
-        generic_locations: "{{ r_generic_devices.results | json_query('[].record.location') }}"
         palo_locations: "{{ r_palo_devices.results | json_query('[].record.location') }}"
 
     - name: Create locations # noqa ignore-errors
-      loop: "{{ cisco_locations | union(generic_locations) | union(palo_locations) | list }}"
+      loop: "{{ palo_locations }}"
       ignore_errors: true
       servicenow.itsm.api:
         resource: cmn_location
