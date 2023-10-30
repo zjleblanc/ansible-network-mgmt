@@ -5,6 +5,7 @@
   become: false
 
   vars:
+    record_limit: 5
     cisco_device_data: "{{ lookup('file', 'files/cisco_device_data.json') | from_json }}"
     generic_device_data: "{{ lookup('file', 'files/generic_device_data.json') | from_json }}"
     palo_device_data: "{{ lookup('file', 'files/palo_device_data.json') | from_json }}"
@@ -21,7 +22,7 @@
       when:
         - cisco_device_data['state'] == 'SUCCEEDED'
         - cisco_device_data['result']['records'] | length > 0
-      loop: "{{ cisco_device_data['result']['records'] }}"
+      loop: "{{ cisco_device_data['result']['records'][:record_limit] }}"
       loop_control:
         loop_var: dev
         label: "{{ dev['entity.name'] }}"
@@ -41,7 +42,7 @@
       when:
         - generic_device_data['state'] == 'SUCCEEDED'
         - generic_device_data['result']['records'] | length > 0
-      loop: "{{ generic_device_data['result']['records'] }}"
+      loop: "{{ generic_device_data['result']['records'][:record_limit] }}"
       loop_control:
         loop_var: dev
         label: "{{ dev['id'] }}"
@@ -61,7 +62,7 @@
       when:
         - palo_device_data['state'] == 'SUCCEEDED'
         - palo_device_data['result']['records'] | length > 0
-      loop: "{{ palo_device_data['result']['records'] }}"
+      loop: "{{ palo_device_data['result']['records'][:record_limit] }}"
       loop_control:
         loop_var: dev
         label: "{{ dev['id'] }}"

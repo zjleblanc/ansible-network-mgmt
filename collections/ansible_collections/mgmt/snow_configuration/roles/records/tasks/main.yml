@@ -1,0 +1,7 @@
+- name: "insert records" 
+  loop: "{{ snow_records }}"
+  loop_control:
+    loop_var: record
+    label: "{{ record.type }}=>{{ record.data.name }}"
+  ansible.builtin.include_tasks:
+    file: insert.yml

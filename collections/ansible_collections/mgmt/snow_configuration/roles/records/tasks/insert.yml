@@ -1,0 +1,31 @@
+---
+- name: "insert | query for existing {{ record.type }}"
+  register: _snow_api_query
+  servicenow.itsm.api_info:
+    resource: "{{ record.type }}"
+    sysparm_query: "{{ record.exists_query | default('name=' + record.data.name) }}"
+
+- name: "insert | add new {{ record.type }}"
+  when: not (_snow_api_query.record|length)
+  register: _insert
+  servicenow.itsm.api:
+    resource: "{{ record.type }}"
+    action: post
+    data: "{{ record.data }}"
+
+- name: "insert | update existing {{ record.type }}"
+  when: _snow_api_query.record|length
+  register: _update
+  servicenow.itsm.api:
+    resource: "{{ record.type }}"
+    action: patch
+    sys_id: "{{ _snow_api_query.record[0].sys_id }}"
+    data: "{{ record.data }}"
+
+- name: insert | set internal record var
+  ansible.builtin.set_fact:
+    _records: "{ '{{ record.type }}': {{ snow_records_out[record.type]|default([]) + [_insert.record|default(_update.record)] }} }"
+
+- name: insert | update external records vars
+  ansible.builtin.set_fact:
+    snow_records_out: "{{ snow_records_out | default({}) | combine(_records) }}"
