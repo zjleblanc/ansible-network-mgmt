@@ -1,5 +1,5 @@
 - name: Gather facts
-  hosts: all
+  hosts: "{{ ansible_limit | default(omit) }}"
   gather_facts: false
   
   tasks:

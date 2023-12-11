@@ -1,0 +1,37 @@
+---
+- name: Gather cisco device data
+  hosts: "{{ _group | default(omit) }}"
+  gather_facts: true
+
+  tasks:
+    - name: Gather nxos facts
+      when: ansible_network_os == 'nxos'
+      cisco.nxos.nxos_facts:
+        gather_subset: all
+
+    - name: Gather ios facts
+      when: ansible_network_os == 'cisco.ios.ios'
+      cisco.ios.ios_facts:
+
+- name: Report on cisco devices (using real data)
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Print device data
+      ansible.builtin.set_fact:
+        devices: "{{ groups[_group] | map('extract', hostvars) | list }}"
+
+    - name: Ensure dist dir exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../dist"
+        state: directory
+        mode: '0755'
+
+    - name: Template interactive report
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/templates/interactive_report_live.html.j2"
+        dest: "{{ playbook_dir }}/../dist/interactive_report_live.html"
+        lstrip_blocks: true
+        trim_blocks: true
+        mode: '0664'
