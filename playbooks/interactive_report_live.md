@@ -1,6 +1,6 @@
-# network interactive report
+# network interactive report (live)
 
-This playbook processes real cisco network device data and generates an interactive report with searching, filtering, and sorting capabilities. The last column also gives users a dialog to inspect the raw facts object.
+This [playbook](./interactive_report_live.yml) processes real cisco network device data and generates an interactive report with searching, filtering, and sorting capabilities. The last column also gives users a dialog to inspect the raw facts object.
 
 ## usage
 

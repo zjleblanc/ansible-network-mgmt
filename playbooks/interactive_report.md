@@ -1,6 +1,6 @@
-# network interactive report
+# network interactive report (mock)
 
-This playbook processes mocked up network device [data](../vars/cisco_facts.yml) and generates an interactive report with searching, filtering, and sorting capabilities. The last column also gives users a dialog to inspect the raw facts object.
+This [playbook](./interactive_report.yml) processes mocked up network device [data](../vars/cisco_facts.yml) and generates an interactive report with searching, filtering, and sorting capabilities. The last column also gives users a dialog to inspect the raw facts object.
 
 ## libraries used
 
