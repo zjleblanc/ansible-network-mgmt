@@ -7,6 +7,10 @@
     config_repo_url: "git@github.com:zjleblanc/{{ config_repo_name }}.git"
 
   tasks:
+    - name: Debug for demo
+      ansible.builtin.debug:
+        msg: "Welcome to the network automation workshop"
+
     - name: Pull the config repo
       ansible.builtin.include_role:
         name: git
