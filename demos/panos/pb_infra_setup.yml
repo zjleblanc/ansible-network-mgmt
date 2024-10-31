@@ -1,0 +1,303 @@
+---
+- name: Build the Palo Alto demo infrastructure
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  vars_files:
+    - "{{ playbook_dir }}/vars/panos_infra.yml"
+
+  tasks:
+    - name: Create VPC for fw
+      register: r_vpc
+      amazon.aws.ec2_vpc_net:
+        name: "{{ panos_demo_vpc.name }}"
+        cidr_block: "{{ panos_demo_vpc.cidr_block }}"
+        tags: "{{ panos_demo_vpc.tags }}"
+
+    - name: Extract VPC id
+      ansible.builtin.set_fact:
+        panos_demo_vpc_id: "{{ r_vpc.vpc.id }}"
+
+    - name: Create Internet gateway
+      register: r_igw
+      amazon.aws.ec2_vpc_igw:
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        tags: "{{ panos_demo_igw.tags }}"
+        state: present
+
+    - name: Extract IGW id
+      ansible.builtin.set_fact:
+        panos_demo_igw_id: "{{ r_igw.gateway_id }}"
+
+    - name: Create public subnet
+      register: r_subnet_public
+      amazon.aws.ec2_vpc_subnet:
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        cidr: "{{ panos_demo_subnet_public.cidr }}"
+        tags: "{{ panos_demo_subnet_public.tags }}" 
+
+    - name: Create private subnet
+      register: r_subnet_private
+      amazon.aws.ec2_vpc_subnet:
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        cidr: "{{ panos_demo_subnet_private.cidr }}"
+        tags: "{{ panos_demo_subnet_private.tags }}" 
+
+    - name: Create security groups (without rules)
+      loop: "{{ panos_demo_security_groups }}"
+      amazon.aws.ec2_security_group:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        tags: "{{ item.tags }}"
+
+    - name: Create security groups (with rules)
+      loop: "{{ panos_demo_security_groups }}"
+      amazon.aws.ec2_security_group:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        rules: "{{ item.rules }}"
+
+    - name: Create network interfaces
+      loop: "{{ panos_demo_network_interfaces }}"
+      register: r_panos_demo_enis
+      amazon.aws.ec2_eni:
+        name: "{{ item.name }}"
+        device_index: "{{ item.device_index }}"
+        private_ip_address: "{{ item.private_ip_address | default(omit) }}"
+        subnet_id: "{{ item.subnet_id }}"
+        security_groups: "{{ item.security_groups }}"
+        source_dest_check: "{{ item.source_dest_check | default(true) }}"
+        tags: "{{ item.tags }}"
+
+    - name: Extrace network interface ids
+      ansible.builtin.set_fact:
+        panos_demo_network_interface_ids: "{{ r_panos_demo_enis.results | map(attribute='interface') | map(attribute='id') | list }}"
+
+    - name: Associate elastic ip with mgmt interface
+      register: r_eip_mgmt
+      amazon.aws.ec2_eip:
+        device_id: "{{ panos_demo_network_interface_ids[0] }}"
+        in_vpc: true
+        tags:
+          Name: "{{ panos_demo_prefix }}-eip-mgmt"
+          demo: panos
+          prefix: "{{ panos_demo_prefix }}"
+          owner: "{{ panos_demo_owner }}"
+          created_by: ansible
+
+    - name: Associate elastic ip with public interface
+      register: r_eip_public
+      amazon.aws.ec2_eip:
+        device_id: "{{ panos_demo_network_interface_ids[1] }}"
+        in_vpc: true
+        tags:
+          Name: "{{ panos_demo_prefix }}-eip-public"
+          demo: panos
+          prefix: "{{ panos_demo_prefix }}"
+          owner: "{{ panos_demo_owner }}"
+          created_by: ansible
+
+    - name: Set up public subnet route table
+      register: r_subnet_public_rt
+      amazon.aws.ec2_vpc_route_table:
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        subnets:
+          - "{{ r_subnet_public.subnet.id }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ panos_demo_igw_id }}"
+        tags:
+          Name: "{{ panos_demo_subnet_public.tags.Name }}-rt"
+          demo: panos
+          prefix: "{{ panos_demo_prefix }}"
+          owner: "{{ panos_demo_owner }}"
+          created_by: ansible
+
+    - name: Set up private subnet route table
+      register: r_subnet_private_rt
+      amazon.aws.ec2_vpc_route_table:
+        vpc_id: "{{ panos_demo_vpc_id }}"
+        subnets:
+          - "{{ r_subnet_private.subnet.id }}"
+        routes:
+          - dest: 0.0.0.0/0
+            network_interface_id: "{{ panos_demo_network_interface_ids[2] }}"
+        tags:
+          Name: "{{ panos_demo_subnet_private.tags.Name }}-rt"
+          demo: panos
+          prefix: "{{ panos_demo_prefix }}"
+          owner: "{{ panos_demo_owner }}"
+          created_by: ansible
+
+    - name: Creating Palo Alto Firewall VM-series
+      register: r_palo_fw
+      amazon.aws.ec2_instance:
+        name: "{{ panos_demo_prefix }}-fw"
+        state: running
+        key_name: "{{ panos_demo_keypair }}"
+        vpc_subnet_id: "{{ r_subnet_public.subnet.id }}"
+        instance_type: c5n.xlarge
+        ebs_optimized: true
+        network_interfaces_ids:
+          - id: "{{ panos_demo_network_interface_ids[0] }}" # mgmt
+            device_index: 0 
+          - id: "{{ panos_demo_network_interface_ids[1] }}" # public
+            device_index: 1
+          - id: "{{ panos_demo_network_interface_ids[2] }}" # private
+            device_index: 2
+        image_id: "{{ panos_demo_ami_pan }}" # Palo Alto Firewall PayGo
+        tags:
+          Name: "{{ panos_demo_prefix }}-fw"
+          demo: panos
+          prefix: "{{ panos_demo_prefix }}" 
+          owner: "{{ panos_demo_owner }}"
+          created_by: ansible
+        wait: true
+        wait_timeout: 600
+
+    - name: Create a firewall configuration item
+      register: r_palo_fw_ci
+      servicenow.itsm.configuration_item:
+        name: "{{ panos_demo_prefix }}-fw"
+        short_description: created by ansible for panos demo
+        serial_number: "{{ r_palo_fw.instances[0].instance_id }}"
+        asset_tag: "{{ r_palo_fw.instances[0].instance_type }}"
+        sys_class_name: cmdb_ci_firewall_network
+        assigned_to: zleblanc
+        environment: development
+        category: Hardware
+        ip_address: "{{ r_palo_fw.instances[0].public_ip_address }}"
+        other:
+          model_number: "{{ r_palo_fw.instances[0].image_id }}"
+          manufacturer: Palo Alto Networks
+          cpu_manufacturer: Palo Alto Networks
+          device_type: Firewall
+
+    - name: Connect and configure firewall admin password
+      tags: config_fw
+      when: 
+        - panos_demo_password is defined
+        - r_palo_fw['instances'] | length
+      block:
+        - name: Wait for port 22 to become open and contain "OpenSSH"
+          ansible.builtin.wait_for:
+            port: 22
+            host: "{{ r_eip_mgmt.public_ip }}"
+            search_regex: OpenSSH
+            delay: 1
+            sleep: 30
+            timeout: 900
+
+        - name: Pause for things to spin up
+          ansible.builtin.pause:
+            minutes: 5
+
+        - name: Set the initial admin password
+          ansible.builtin.expect:
+            command: "ssh -o StrictHostKeyChecking=accept-new admin@{{ r_eip_mgmt.public_ip }}"
+            timeout: 60
+            responses:
+              "admin@PA-VM>":
+                - "configure"
+                - "exit"
+              "admin@PA-VM#":
+                - "set mgt-config users admin password"
+                - "commit"
+                - "exit"
+              "Enter password   :":
+                - "{{ panos_demo_password }}"
+              "Confirm password :":
+                - "{{ panos_demo_password }}"
+
+    - name: Create bastion host
+      when: create_bastion | default(true)
+      block:
+        - name: Create bastion network interfaces
+          loop: "{{ panos_demo_bastion_network_interfaces }}"
+          register: r_panos_demo_bastion_enis
+          amazon.aws.ec2_eni:
+            name: "{{ item.name }}"
+            device_index: "{{ item.device_index }}"
+            private_ip_address: "{{ item.private_ip_address | default(omit) }}"
+            subnet_id: "{{ item.subnet_id }}"
+            security_groups: "{{ item.security_groups }}"
+            source_dest_check: "{{ item.source_dest_check | default(true) }}"
+            tags: "{{ item.tags }}"
+
+        - name: Extrace network interface ids
+          ansible.builtin.set_fact:
+            panos_demo_bastion_network_interface_ids: "{{ r_panos_demo_bastion_enis.results | map(attribute='interface') | map(attribute='id') | list }}"
+
+        - name: Associate elastic ip with bastion public interface
+          register: r_bastion_eip_public
+          amazon.aws.ec2_eip:
+            device_id: "{{ panos_demo_bastion_network_interface_ids[0] }}"
+            in_vpc: true
+            tags:
+              Name: "{{ panos_demo_prefix }}-bastion-eip-public"
+              demo: panos
+              prefix: "{{ panos_demo_prefix }}"
+              owner: "{{ panos_demo_owner }}"
+              created_by: ansible
+
+        - name: Creating Bastion ec2
+          register: r_bastion_ec2
+          amazon.aws.ec2_instance:
+            name: "{{ panos_demo_prefix }}-bastion"
+            state: running
+            key_name: "{{ panos_demo_keypair }}"
+            vpc_subnet_id: "{{ r_subnet_public.subnet.id }}"
+            instance_type: t2.micro
+            network_interfaces_ids:
+              - id: "{{ panos_demo_bastion_network_interface_ids[0] }}" # public
+                device_index: 0 
+              - id: "{{ panos_demo_bastion_network_interface_ids[1] }}" # private
+                device_index: 1
+            image_id: "{{ panos_demo_ami_rhel }}" # RHEL9
+            tags:
+              Name: "{{ panos_demo_prefix }}-bastion"
+              demo: panos
+              prefix: "{{ panos_demo_prefix }}" 
+              owner: "{{ panos_demo_owner }}"
+              created_by: ansible
+            wait: true
+            wait_timeout: 600
+
+    - name: Create webserver host
+      when: create_webserver | default(true)
+      block:
+        - name: Create webserver network interface
+          loop: "{{ panos_demo_webserver_network_interfaces }}"
+          register: r_panos_demo_webserver_enis
+          amazon.aws.ec2_eni:
+            name: "{{ item.name }}"
+            device_index: "{{ item.device_index }}"
+            private_ip_address: "{{ item.private_ip_address | default(omit) }}"
+            subnet_id: "{{ item.subnet_id }}"
+            security_groups: "{{ item.security_groups }}"
+            source_dest_check: "{{ item.source_dest_check | default(true) }}"
+            tags: "{{ item.tags }}"
+
+        - name: Creating webserver ec2
+          register: r_webserver_ec2
+          amazon.aws.ec2_instance:
+            name: "{{ panos_demo_prefix }}-webserver"
+            state: running
+            key_name: "{{ panos_demo_keypair }}"
+            vpc_subnet_id: "{{ r_subnet_private.subnet.id }}"
+            instance_type: t2.micro
+            network_interfaces_ids:
+              - id: "{{ r_panos_demo_webserver_enis.results[0].interface.id }}" # private
+                device_index: 0 
+            image_id: "{{ panos_demo_ami_rhel }}" # RHEL9
+            tags:
+              Name: "{{ panos_demo_prefix }}-webserver"
+              demo: panos
+              prefix: "{{ panos_demo_prefix }}" 
+              owner: "{{ panos_demo_owner }}"
+              created_by: ansible
+            wait: true
+            wait_timeout: 600
