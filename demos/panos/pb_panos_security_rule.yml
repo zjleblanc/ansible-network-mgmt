@@ -1,0 +1,28 @@
+---
+- name: Create / Update PanOS Security Rule
+  hosts: localhost
+  gather_facts: false
+  become: false
+
+  tasks:
+    - name: Log ServiceNow ticket
+      register: r_snow_ticket
+      servicenow.itsm.api_info:
+        resource: sc_req_item
+        sys_id: "{{ snow_sys_id }}"
+
+    - name: Define PanOS security rule
+      register: r_panos_security_rule
+      check_mode: "{{ panos_check_mode | default(true) }}"
+      paloaltonetworks.panos.panos_security_rule:
+        provider: "{{ panos_provider }}"
+        rule_name: "{{ panos_rule_name }}"
+        rule_type: "{{ panos_rule_type | default(omit) }}"
+        action: "{{ panos_action | default(omit) }}"
+        location: "{{ panos_location | default(omit) }}"
+        source_zone: "{{ [panos_source_zone] | default(omit) }}"
+        source_ip: "{{ [panos_source_ip] | default(omit) }}"
+        destination_zone: "{{ [panos_destination_zone] | default(omit) }}"
+        destination_ip: "{{ [panos_destination_ip] | default(omit) }}"
+        state: "{{ panos_state | default(omit) }}"
+        commit: "{{ panos_commit | default(false) | bool }}"
