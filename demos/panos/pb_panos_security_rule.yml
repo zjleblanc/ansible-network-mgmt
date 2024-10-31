@@ -19,10 +19,15 @@
         rule_name: "{{ panos_rule_name }}"
         rule_type: "{{ panos_rule_type | default(omit) }}"
         action: "{{ panos_action | default(omit) }}"
-        location: "{{ panos_location | default(omit) }}"
+        # location: "{{ panos_location | default(omit) }}"
         source_zone: "{{ [panos_source_zone] | default(omit) }}"
         source_ip: "{{ [panos_source_ip] | default(omit) }}"
         destination_zone: "{{ [panos_destination_zone] | default(omit) }}"
         destination_ip: "{{ [panos_destination_ip] | default(omit) }}"
         state: "{{ panos_state | default(omit) }}"
-        commit: "{{ panos_commit | default(false) | bool }}"
+
+    - name: Commit firewall changes
+      when: panos_commit | default(false) | bool
+      paloaltonetworks.panos.panos_commit_firewall:
+        provider: "{{ panos_provider }}"
+        description: "Changes committed by ansible on {{ lookup('pipe', 'date') }} based on request: {{ snow_ritm }}"
