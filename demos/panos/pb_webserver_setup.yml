@@ -1,6 +1,6 @@
 ---
 - name: Start a webserver
-  hosts: webservers
+  hosts: role_webserver
   gather_facts: false
   become: true
 
