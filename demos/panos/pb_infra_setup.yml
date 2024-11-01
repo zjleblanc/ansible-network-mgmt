@@ -155,8 +155,16 @@
           prefix: "{{ panos_demo_prefix }}" 
           owner: "{{ panos_demo_owner }}"
           created_by: ansible
+          role: firewall
         wait: true
         wait_timeout: 600
+
+    - name: Ensure network interfaces source/dest check disabled
+      loop: "{{ panos_demo_network_interface_ids[1:] }}"
+      register: r_panos_demo_enis
+      amazon.aws.ec2_eni:
+        eni_id: "{{ item }}"
+        source_dest_check: false
 
     - name: Create a firewall configuration item
       register: r_palo_fw_ci
@@ -263,6 +271,7 @@
               prefix: "{{ panos_demo_prefix }}" 
               owner: "{{ panos_demo_owner }}"
               created_by: ansible
+              role: bastion
             wait: true
             wait_timeout: 600
 
@@ -299,5 +308,6 @@
               prefix: "{{ panos_demo_prefix }}" 
               owner: "{{ panos_demo_owner }}"
               created_by: ansible
+              role: webserver
             wait: true
             wait_timeout: 600

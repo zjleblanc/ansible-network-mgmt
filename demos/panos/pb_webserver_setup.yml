@@ -1,0 +1,9 @@
+---
+- name: Start a webserver
+  hosts: webservers
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: test
+      ansible.builtin.setup:

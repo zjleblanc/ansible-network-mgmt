@@ -47,8 +47,11 @@
 
     - name: Delete route table(s)
       loop: "{{ r_vpc_rt_info.route_tables }}"
+      loop_control:
+        label: "{{ item.route_table_id }}"
       amazon.aws.ec2_vpc_route_table:
-        route_table_id: "{{ item.id }}"
+        route_table_id: "{{ item.route_table_id }}"
+        lookup: id
         state: absent
 
     - name: Gather subnet info
