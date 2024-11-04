@@ -18,9 +18,10 @@
           route:
             - network: 169.254.169.254 # Instance metadata service (IMDS)
     network_state:
-      - name: System eth0
-        type: ethernet
-        state: up
+      interfaces:
+        - name: System eth0
+          type: ethernet
+          state: up
 
   tasks:
     - name: Install required packages
