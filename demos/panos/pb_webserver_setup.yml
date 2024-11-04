@@ -4,6 +4,39 @@
   gather_facts: false
   become: true
 
+  vars:
+    network_connections:
+      - name: System eth0
+        type: ethernet
+        interface_name: eth0
+        ip:
+          address:
+            - 10.0.2.40/24
+          gateway4: 10.0.2.20
+          route:
+            - network: 169.254.269.254
+    # network_state:
+    #   - name: System eth0
+    #     type: ethernet
+    #     state: up
+    #     ipv4:
+    #       address:
+    #       - ip: 10.0.2.40
+    #         prefix-length: 24
+    #       enabled: true
+
   tasks:
-    - name: test
-      ansible.builtin.setup:
+    - name: Apply network configuration
+      ansible.builtin.include_role:
+        name: redhat.rhel_system_roles.network
+
+    - name: Install the latest version of Apache
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+
+    - name: Start httpd
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
