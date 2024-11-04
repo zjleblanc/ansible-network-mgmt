@@ -1,0 +1,40 @@
+- name: Get Network Devices
+  hosts: localhost
+    
+  gather_facts: false
+
+  vars:
+    ise_hostname: "{{ lookup('env', 'ISE_HOSTNAME') }}"
+    ise_username: "{{ lookup('env', 'ISE_USERNAME') }}"
+    ise_password: "{{ lookup('env', 'ISE_PASSWORD') }}"
+    ise_version: 3.2.0  # your major ISE version - optional, defaults to 3.0.0
+    ise_verify: False  # verify your ISE SSL cert - optional, defaults to True
+
+  tasks:
+    - name: Get user info for our network device IDs  # run through our list of groups and obtain the group information
+      register: r_network_device_info
+      cisco.ise.network_device_info:
+        ise_hostname: "{{ ise_hostname }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        ise_debug: True
+
+    - name: Print the result for each device ID
+      ansible.builtin.debug:
+        msg: 
+        - "CSR1000v: {{ r_network_device_info.ise_response | selectattr('name', 'match', 'CSR1000v') | map(attribute='id') }}" 
+        - "Cat8000: {{ r_network_device_info.ise_response | selectattr('name', 'match', 'Cat8000') | map(attribute='id') }}" 
+     
+    - name: Get user info for our network devices  # run through our list of groups and obtain the group information
+      loop: "{{ r_network_device_info.ise_response | map(attribute='id') }}"
+      cisco.ise.network_device_info:
+        ise_hostname: "{{ ise_hostname }}"
+        ise_username: "{{ ise_username }}"
+        ise_password: "{{ ise_password }}"
+        ise_verify: "{{ ise_verify }}"
+        id: "{{ item }}"
+    
+    - name: Print the result for each device ID
+      ansible.builtin.debug:
+        var: r_network_device_id
