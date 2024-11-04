@@ -13,22 +13,23 @@
           address:
             - 10.0.2.40/24
           gateway4: 10.0.2.20
-          route:
-            - network: 169.254.169.254
-    # network_state:
-    #   - name: System eth0
-    #     type: ethernet
-    #     state: up
-    #     ipv4:
-    #       address:
-    #       - ip: 10.0.2.40
-    #         prefix-length: 24
-    #       enabled: true
+    network_state:
+      - name: System eth0
+        type: ethernet
+        state: up
+        ipv4:
+          address:
+          - ip: 10.0.2.40
+            prefix-length: 24
+          enabled: true
 
   tasks:
     - name: Apply network configuration
       ansible.builtin.include_role:
         name: redhat.rhel_system_roles.network
+
+    - name: Add support for instance metadata service
+      ansible.builtin.command: ip route add 169.254.169.254
 
     - name: Install the latest version of Apache
       ansible.builtin.dnf:
