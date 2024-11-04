@@ -11,6 +11,7 @@
     - name: Create VPC for fw
       register: r_vpc
       amazon.aws.ec2_vpc_net:
+        region: "{{ aws_region | default(omit) }}"
         name: "{{ panos_demo_vpc.name }}"
         cidr_block: "{{ panos_demo_vpc.cidr_block }}"
         tags: "{{ panos_demo_vpc.tags }}"
@@ -22,6 +23,7 @@
     - name: Create Internet gateway
       register: r_igw
       amazon.aws.ec2_vpc_igw:
+        region: "{{ aws_region | default(omit) }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
         tags: "{{ panos_demo_igw.tags }}"
         state: present
@@ -33,6 +35,7 @@
     - name: Create public subnet
       register: r_subnet_public
       amazon.aws.ec2_vpc_subnet:
+        region: "{{ aws_region | default(omit) }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
         cidr: "{{ panos_demo_subnet_public.cidr }}"
         tags: "{{ panos_demo_subnet_public.tags }}" 
@@ -40,6 +43,7 @@
     - name: Create private subnet
       register: r_subnet_private
       amazon.aws.ec2_vpc_subnet:
+        region: "{{ aws_region | default(omit) }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
         cidr: "{{ panos_demo_subnet_private.cidr }}"
         tags: "{{ panos_demo_subnet_private.tags }}" 
@@ -47,6 +51,7 @@
     - name: Create security groups (without rules)
       loop: "{{ panos_demo_security_groups }}"
       amazon.aws.ec2_security_group:
+        region: "{{ aws_region | default(omit) }}"
         name: "{{ item.name }}"
         description: "{{ item.description }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
@@ -55,6 +60,7 @@
     - name: Create security groups (with rules)
       loop: "{{ panos_demo_security_groups }}"
       amazon.aws.ec2_security_group:
+        region: "{{ aws_region | default(omit) }}"
         name: "{{ item.name }}"
         description: "{{ item.description }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
@@ -64,6 +70,7 @@
       loop: "{{ panos_demo_network_interfaces }}"
       register: r_panos_demo_enis
       amazon.aws.ec2_eni:
+        region: "{{ aws_region | default(omit) }}"
         name: "{{ item.name }}"
         device_index: "{{ item.device_index }}"
         private_ip_address: "{{ item.private_ip_address | default(omit) }}"
@@ -79,6 +86,7 @@
     - name: Associate elastic ip with mgmt interface
       register: r_eip_mgmt
       amazon.aws.ec2_eip:
+        region: "{{ aws_region | default(omit) }}"
         device_id: "{{ panos_demo_network_interface_ids[0] }}"
         in_vpc: true
         tags:
@@ -91,6 +99,7 @@
     - name: Associate elastic ip with public interface
       register: r_eip_public
       amazon.aws.ec2_eip:
+        region: "{{ aws_region | default(omit) }}"
         device_id: "{{ panos_demo_network_interface_ids[1] }}"
         in_vpc: true
         tags:
@@ -103,6 +112,7 @@
     - name: Set up public subnet route table
       register: r_subnet_public_rt
       amazon.aws.ec2_vpc_route_table:
+        region: "{{ aws_region | default(omit) }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
         subnets:
           - "{{ r_subnet_public.subnet.id }}"
@@ -119,6 +129,7 @@
     - name: Set up private subnet route table
       register: r_subnet_private_rt
       amazon.aws.ec2_vpc_route_table:
+        region: "{{ aws_region | default(omit) }}"
         vpc_id: "{{ panos_demo_vpc_id }}"
         subnets:
           - "{{ r_subnet_private.subnet.id }}"
@@ -135,6 +146,7 @@
     - name: Creating Palo Alto Firewall VM-series
       register: r_palo_fw
       amazon.aws.ec2_instance:
+        region: "{{ aws_region | default(omit) }}"
         name: "{{ panos_demo_prefix }}-fw"
         state: running
         key_name: "{{ panos_demo_keypair }}"
@@ -163,6 +175,7 @@
       loop: "{{ panos_demo_network_interface_ids[1:] }}"
       register: r_panos_demo_enis
       amazon.aws.ec2_eni:
+        region: "{{ aws_region | default(omit) }}"
         eni_id: "{{ item }}"
         source_dest_check: false
 
@@ -227,6 +240,7 @@
           loop: "{{ panos_demo_bastion_network_interfaces }}"
           register: r_panos_demo_bastion_enis
           amazon.aws.ec2_eni:
+            region: "{{ aws_region | default(omit) }}"
             name: "{{ item.name }}"
             device_index: "{{ item.device_index }}"
             private_ip_address: "{{ item.private_ip_address | default(omit) }}"
@@ -242,6 +256,7 @@
         - name: Associate elastic ip with bastion public interface
           register: r_bastion_eip_public
           amazon.aws.ec2_eip:
+            region: "{{ aws_region | default(omit) }}"
             device_id: "{{ panos_demo_bastion_network_interface_ids[0] }}"
             in_vpc: true
             tags:
@@ -254,6 +269,7 @@
         - name: Creating Bastion ec2
           register: r_bastion_ec2
           amazon.aws.ec2_instance:
+            region: "{{ aws_region | default(omit) }}"
             name: "{{ panos_demo_prefix }}-bastion"
             state: running
             key_name: "{{ panos_demo_keypair }}"
@@ -282,6 +298,7 @@
           loop: "{{ panos_demo_webserver_network_interfaces }}"
           register: r_panos_demo_webserver_enis
           amazon.aws.ec2_eni:
+            region: "{{ aws_region | default(omit) }}"
             name: "{{ item.name }}"
             device_index: "{{ item.device_index }}"
             private_ip_address: "{{ item.private_ip_address | default(omit) }}"
@@ -293,6 +310,7 @@
         - name: Creating webserver ec2
           register: r_webserver_ec2
           amazon.aws.ec2_instance:
+            region: "{{ aws_region | default(omit) }}"
             name: "{{ panos_demo_prefix }}-webserver"
             state: running
             key_name: "{{ panos_demo_keypair }}"
