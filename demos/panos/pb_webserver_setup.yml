@@ -43,5 +43,5 @@
         enabled: true
 
     - name: Test network config
-      ansible.netcommon.net_ping:
-        dest: google.com
+      ansible.builtin.command:
+        command: ping -c 1 google.com
