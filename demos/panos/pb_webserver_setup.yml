@@ -14,7 +14,7 @@
             - 10.0.2.40/24
           gateway4: 10.0.2.20
           route:
-            - network: 169.254.269.254
+            - network: 169.254.169.254
     # network_state:
     #   - name: System eth0
     #     type: ethernet
