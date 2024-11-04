@@ -43,5 +43,4 @@
         enabled: true
 
     - name: Test network config
-      ansible.builtin.command:
-        command: ping -c 1 google.com
+      ansible.builtin.command: ping -c 1 google.com
