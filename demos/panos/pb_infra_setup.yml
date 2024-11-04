@@ -6,6 +6,7 @@
 
   vars_files:
     - "{{ playbook_dir }}/vars/panos_infra.yml"
+    - "{{ playbook_dir }}/vars/panos_secrets.yml"
 
   tasks:
     - name: Create VPC for fw
