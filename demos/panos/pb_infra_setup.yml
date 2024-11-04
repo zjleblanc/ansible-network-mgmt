@@ -200,7 +200,7 @@
     - name: Connect and configure firewall admin password
       tags: config_fw
       when: 
-        - not skip_fw_password | default(false)
+        - not skip_fw_password | bool | default(false)
         - panos_demo_password is defined
         - r_palo_fw['instances'] | length
       block:
