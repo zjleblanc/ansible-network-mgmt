@@ -21,14 +21,17 @@
         state: up
 
   tasks:
+    - name: Install required packages
+      ansible.builtin.dnf:
+        name: 
+          - httpd
+          - nmstate
+          - NetworkManager
+        state: present
+
     - name: Apply network configuration
       ansible.builtin.include_role:
         name: redhat.rhel_system_roles.network
-
-    - name: Install the latest version of Apache
-      ansible.builtin.dnf:
-        name: httpd
-        state: present
 
     - name: Start httpd
       ansible.builtin.service:
