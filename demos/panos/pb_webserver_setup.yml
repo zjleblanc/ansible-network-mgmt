@@ -14,7 +14,7 @@
             - 10.0.2.40/24
           gateway4: 10.0.2.20
           dns:
-            - 10.0.2.1
+            - 10.0.0.2
           route:
             - network: 169.254.169.254 # Instance metadata service (IMDS)
     network_state:
@@ -41,3 +41,7 @@
         name: httpd
         state: started
         enabled: true
+
+    - name: Test network config
+      ansible.netcommon.net_ping:
+        dest: google.com
