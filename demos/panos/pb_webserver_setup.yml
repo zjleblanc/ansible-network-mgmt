@@ -13,17 +13,12 @@
           address:
             - 10.0.2.40/24
           gateway4: 10.0.2.20
-          # route:
-          #   - network: 169.254.169.254
-    # network_state:
-    #   - name: System eth0
-    #     type: ethernet
-    #     state: up
-    #     ipv4:
-    #       address:
-    #       - ip: 10.0.2.40
-    #         prefix-length: 24
-    #       enabled: true
+          dns:
+            - 10.0.2.1
+    network_state:
+      - name: System eth0
+        type: ethernet
+        state: up
 
   tasks:
     - name: Apply network configuration
