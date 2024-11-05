@@ -201,7 +201,7 @@
     - name: Connect and configure firewall admin password
       tags: config_fw
       when: 
-        - not skip_fw_password | bool | default(false)
+        - not skip_fw_password | default(false) | bool
         - panos_demo_password is defined
         - r_palo_fw['instances'] | length
       block:
@@ -220,7 +220,7 @@
 
         - name: Set the initial admin password
           ansible.builtin.expect:
-            command: "ssh -o StrictHostKeyChecking=accept-new admin@{{ r_eip_mgmt.public_ip }}"
+            command: "ssh -i {{ ansible_ssh_private_key_file }} -o StrictHostKeyChecking=accept-new admin@{{ r_eip_mgmt.public_ip }}"
             timeout: 60
             responses:
               "admin@PA-VM>":
