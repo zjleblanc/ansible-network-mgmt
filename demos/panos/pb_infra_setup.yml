@@ -182,6 +182,7 @@
 
     - name: Create a firewall configuration item
       register: r_palo_fw_ci
+      when: lookup('env', 'SN_HOST')
       servicenow.itsm.configuration_item:
         name: "{{ panos_demo_prefix }}-fw"
         short_description: created by ansible for panos demo
