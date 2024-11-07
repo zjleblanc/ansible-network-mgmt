@@ -83,7 +83,9 @@ To clear out the environment, be sure to run the corresponding `unset` commands 
 
 ## Infrastructure Setup
 
-Specify the panos firewall admin via one of two options:
+Before you run this playbook, update the `panos_demo_keypair` variable in [vars/panos_infra.yml](./vars/panos_infra.yml) to match an existing key pair in the AWS region you are targeting. For more information, see guide for [Creating a Key Pair](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html).
+
+When you run this playbook, specify the panos firewall admin password via one of two options:
 
 1. Using an extra variable at the command line and commenting out the vars_file entry for `panos_secrets.yml`<br>`ansible-playbook pb_infra_setup.yml -e panos_demo_password="$3cr3t"`
 2. Delete and create your own vaulted `panos_secrets.yml` file with the **panos_demo_password** defined. I will not be sharing my vault password :D Assuming you are in the playbook directory,<br>`ansible-vault create vars/panos_secrets.yml`<br>`ansible-playbook pb_infra_setup.yml`
@@ -108,7 +110,37 @@ I have these variables setup to be sourced from a custom Credential Type in AAP,
 
 ## Webserver Setup
 
-This one's a bit trickier - we must use the bastion host as an SSH Proxy - docs to come...
+This playbook can be run locally, but requires an understanding of how to use the `ProxyCommand` option for ssh. I have included an inventory configuration using the [amazon.aws.aws_ec2](https://docs.ansible.com/ansible/latest/collections/amazon/aws/aws_ec2_inventory.html) plugin to dynamically import the hosts provisioned during [Infrastructure Setup](#infrastructure-setup). Adjacent to the config, you will notice a group_vars folder with defined variables for [role_webserver](./inventory/group_vars/role_webserver.yml). These variables support the use of ProxyCommand and require you to have a single environment variable defined:
+
+| Environment Variable | Example |
+| --- | --- |
+| SSH_PROXY_KEY | `~/.ssh/id_rsa` |
+
+**IMPORTANT**: the private key referenced must be a associated with the key pair attached to both VMs (the bastion and webserver). Refer to the `panos_demo_keypair` variable in [vars/panos_infra.yml](./vars/panos_infra.yml).
+
+Test the inventory setup:<br>`ansible-inventory --list -i inventory/`
+
+Run the playbook and specify the dynamic inventory:<br>`ansible-playbook -i inventory/ pb_webserver_setup.yml`
+
+### How does it work?
+
+The key pair used to provision an ec2 puts your public key in the authorized_keys file for ec2-user. This allows us to SSH directly to the bastion host's public IP address. The webserver does not have a public IP address, but it is configured to allow SSH connections from the bastion host. The variables explained below inform Ansible to automate against any host in the **role_webserver** group (determined by the role tag) using the bastion host as an SSH proxy:
+
+| Variable | Explanation |
+| --- | --- |
+| ansible_user | The target user for destination box (webserver) |
+| ssh_proxy_username | The target user for proxy (bastion) |
+| ssh_proxy_host | Sourcing the public_ip_address fact from the first host in the **role_bastion** group |
+| ansible_ssh_private_key_file | Specifies the private key file to be used for destination box (webserver) |
+| SSH_PROXY_KEY (environment) | Specifies the private key file to be use for proxy (bastion) |
+| ansible_ssh_common_args | The meat of this setup - defines the SSH arguments to leverage a proxy host (heavily dependent on the variables above) |
+
+Example rendered command:
+```
+ssh ... -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+  -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+  -i ~/.ssh/id_rsa -W %h:%p -q ec2-user@18.191.82.190' 10.0.2.40
+```
 
 ## Infrastructure Tear Down
 
