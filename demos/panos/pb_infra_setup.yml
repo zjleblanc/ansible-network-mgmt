@@ -333,6 +333,7 @@
               inputs:
                 ssh_proxy_username: "ec2-user"
                 ssh_proxy_host: "{{ r_bastion_eip_public.public_ip }}"
+                ssh_proxy_key: "$encrypted$"
 
     - name: Create webserver host
       when: create_webserver | default(true)
