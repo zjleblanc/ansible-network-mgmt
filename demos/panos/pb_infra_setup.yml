@@ -239,14 +239,21 @@
 
         - name: Update credential in AAP | Palo Alto Firewall (admin)
           when: lookup('env', 'CONTROLLER_HOST')
-          ansible.controller.credential:
-            name: Palo Alto Firewall (admin)
-            organization: Autodotes
-            credential_type: Palo Alto Networks Provider
-            inputs:
-              panos_ip_address: "{{ r_eip_mgmt.public_ip }}"
-              panos_username: admin
-              panos_password: "{{ panos_demo_password }}"
+          ansible.builtin.uri:
+            url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/96/"
+            method: PATCH
+            headers:
+              Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
+            body:
+              name: Palo Alto Firewall (admin)
+              organization: 3 # Autodotes
+              isOrgLookupDisabled: false
+              description: Palo Alto Firewall administrator credentials compatible with the palaltonetworks.panos collection
+              credential_type: 57 # Palo Alto Networks Provider
+              inputs:
+                panos_ip_address: "{{ r_eip_mgmt.public_ip }}"
+                panos_username: admin
+                panos_password: "{{ panos_demo_password }}"
 
     - name: Create bastion host
       when: create_bastion | default(true)
@@ -308,14 +315,20 @@
 
         - name: Update credential in AAP | Palo Alto Bastion
           when: lookup('env', 'CONTROLLER_HOST')
-          ansible.controller.credential:
-            name: Palo Alto Bastion
-            organization: Autodotes
-            credential_type: SSH Proxy
-            update_secrets: false
-            inputs:
-              ssh_proxy_username: "ec2-user"
-              ssh_proxy_host: "{{ r_bastion_eip_public.public_ip }}"
+          ansible.builtin.uri:
+            url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/94/"
+            method: PATCH
+            headers:
+              Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
+            body:
+              name: Palo Alto Bastion
+              organization: 3 # Autodotes
+              isOrgLookupDisabled: false
+              description: Palo Alto Bastion credential for supporting SSH proxy implementation
+              credential_type: 54 # SSH Proxy
+              inputs:
+                ssh_proxy_username: "ec2-user"
+                ssh_proxy_host: "{{ r_bastion_eip_public.public_ip }}"
 
     - name: Create webserver host
       when: create_webserver | default(true)
