@@ -2,6 +2,8 @@
 
 This demo contains the Ansible content required to deploy and configure a Palo Alto (Virtual) Firewall in AWS and provision two EC2 instances serving as a bastion host and web server. The resulting network makes it possible to demonstrate use of the [paloaltonetworks.panos](https://galaxy.ansible.com/paloaltonetworks/panos) ansible collection.
 
+![Palo Alto Infrastructure Diagram](../../.attachments/palo_alto_infra_diagram.png)
+
 Kudos to my references for this demo:
 - [Eric Ames](https://github.com/ericcames/aap.dailydemo.Panos)
 - [Grant Carmichael](https://evanced.net/wp-content/uploads/2015/10/Building-an-AWS-Web-Server-Farm-Protected-by-Palo-Alto-v1.pdf)
