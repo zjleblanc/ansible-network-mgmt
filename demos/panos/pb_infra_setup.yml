@@ -237,6 +237,17 @@
               "Confirm password :":
                 - "{{ panos_demo_password }}"
 
+        - name: Update the Credential in AAP
+          when: lookup('env', 'CONTROLLER_HOST')
+          ansible.controller.credential:
+            name: Palo Alto Firewall (admin)
+            organization: Autodotes
+            credential_type: Palo Alto Networks Provider
+            inputs:
+              panos_ip_address: "{{ r_eip_mgmt.public_ip }}"
+              panos_username: admin
+              panos_password: "{{ panos_demo_password }}"
+
     - name: Create bastion host
       when: create_bastion | default(true)
       block:
