@@ -239,11 +239,13 @@
 
         - name: Update credential in AAP | Palo Alto Firewall (admin)
           when: lookup('env', 'CONTROLLER_HOST')
+          no_log: true
           ansible.builtin.uri:
             url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/96/"
             method: PATCH
             headers:
               Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
+            body_format: json
             body:
               name: Palo Alto Firewall (admin)
               organization: 3 # Autodotes
@@ -315,11 +317,13 @@
 
         - name: Update credential in AAP | Palo Alto Bastion
           when: lookup('env', 'CONTROLLER_HOST')
+          no_log: true
           ansible.builtin.uri:
             url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/94/"
             method: PATCH
             headers:
               Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
+            body_format: json
             body:
               name: Palo Alto Bastion
               organization: 3 # Autodotes
