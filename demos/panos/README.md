@@ -103,6 +103,9 @@ panos_provider:
   password: "{{ panos_demo_password }}"
 ```
 
+I have these variables setup to be sourced from a custom Credential Type in AAP, so locally you will need to explicitly pass the vaulted file via a command line argument:<br>
+`ansible-playbook pb_firewall_configure.yml -e @vars/panos_secrets.yml`
+
 ## Webserver Setup
 
 This one's a bit trickier - we must use the bastion host as an SSH Proxy - docs to come...
