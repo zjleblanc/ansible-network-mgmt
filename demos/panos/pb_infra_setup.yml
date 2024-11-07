@@ -216,6 +216,7 @@
             timeout: 900
 
         - name: Pause for things to spin up
+          when: r_palo_fw is changed
           ansible.builtin.pause:
             minutes: 5
 
