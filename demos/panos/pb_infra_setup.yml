@@ -237,7 +237,7 @@
               "Confirm password :":
                 - "{{ panos_demo_password }}"
 
-        - name: Update the Credential in AAP
+        - name: Update credential in AAP | Palo Alto Firewall (admin)
           when: lookup('env', 'CONTROLLER_HOST')
           ansible.controller.credential:
             name: Palo Alto Firewall (admin)
@@ -306,6 +306,17 @@
             wait: true
             wait_timeout: 600
 
+        - name: Update credential in AAP | Palo Alto Bastion
+          when: lookup('env', 'CONTROLLER_HOST')
+          ansible.controller.credential:
+            name: Palo Alto Bastion
+            organization: Autodotes
+            credential_type: SSH Proxy
+            update_secrets: false
+            inputs:
+              ssh_proxy_username: "ec2-user"
+              ssh_proxy_host: "{{ r_bastion_eip_public.public_ip }}"
+
     - name: Create webserver host
       when: create_webserver | default(true)
       block:
@@ -344,3 +355,13 @@
               role: webserver
             wait: true
             wait_timeout: 600
+
+    - name: Save stats for downstream workflow nodes
+      ansible.builtin.set_stats:
+        data:
+          panos_demo_vpc_id: "{{ panos_demo_vpc_id }}"
+          panos_demo_igw_id: "{{ panos_demo_igw_id }}"
+          panos_fw_mgmt_ip: "{{ r_eip_mgmt.public_ip }}"
+          panos_fw_public_ip: "{{ r_eip_public.public_ip }}"
+          panos_fw_sys_id: "{{ r_palo_fw_ci.record.sys_id | default(omit) }}"
+          panos_bastion_public_ip: "{{ r_bastion_eip_public.public_ip }}"
