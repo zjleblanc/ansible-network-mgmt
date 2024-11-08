@@ -68,7 +68,7 @@
 
         - name: Complete ServiceNow requested item
           register: r_snow_ticket
-          servicenow.itsm.api_info:
+          servicenow.itsm.api:
             resource: sc_req_item
             sys_id: "{{ snow_sys_id }}"
             action: patch
