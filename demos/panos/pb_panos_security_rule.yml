@@ -4,6 +4,9 @@
   gather_facts: false
   become: false
 
+  vars:
+    _commit: "{{ panos_commit | default(false) | bool }}"
+
   tasks:
     - name: Log ServiceNow ticket
       register: r_snow_ticket
@@ -13,7 +16,7 @@
 
     - name: Define PanOS security rule
       register: r_panos_security_rule
-      check_mode: "{{ panos_check_mode | default(true) }}"
+      check_mode: not _commit
       paloaltonetworks.panos.panos_security_rule:
         provider: "{{ panos_provider }}"
         rule_name: "{{ panos_rule_name }}"
@@ -27,7 +30,7 @@
         state: "{{ panos_state | ternary (panos_state, 'present') }}"
 
     - name: Commit firewall changes
-      when: panos_commit | default(false) | bool
+      when: _commit
       paloaltonetworks.panos.panos_commit_firewall:
         provider: "{{ panos_provider }}"
         description: "Changes committed by ansible on {{ lookup('pipe', 'date') }} based on request: {{ snow_ritm }}"
