@@ -8,12 +8,30 @@
     _commit: "{{ panos_commit | default(false) | bool }}"
 
   tasks:
-    - name: Log ServiceNow ticket
-      register: r_snow_ticket
+    - name: Service now pre change steps
       when: snow_sys_id is defined
-      servicenow.itsm.api_info:
-        resource: sc_req_item
-        sys_id: "{{ snow_sys_id }}"
+      block:
+        - name: Get ServiceNow requested item
+          register: r_snow_ticket
+          servicenow.itsm.api_info:
+            resource: sc_req_item
+            sys_id: "{{ snow_sys_id }}"
+
+        - name: Get ServiceNow configuration item
+          register: r_snow_ci
+          servicenow.itsm.configuration_item_info:
+            name: "{{ snow_ci_name }}"
+
+        - name: Create a catalog task
+          register: r_snow_sctask
+          servicenow.itsm.api:
+            resource: sc_task
+            action: post
+            data:
+              short_description: Ansible Job Template running to modify security rule
+              description: https://controller.autodotes.com/#/jobs/playbook/{{ awx_job_id | default('unk') }}/details
+              request_item: "{{ snow_sys_id }}"
+              cmdb_ci: "{{ r_snow_ci.record.sys_id }}"
 
     - name: Define PanOS security rule
       register: r_panos_security_rule
@@ -35,3 +53,24 @@
       paloaltonetworks.panos.panos_commit_firewall:
         provider: "{{ panos_provider }}"
         description: "Changes committed by ansible on {{ lookup('pipe', 'date') }} based on request: {{ snow_ritm | default('N/A') }}"
+
+    - name: Service now post change steps
+      when: snow_sys_id is defined
+      block:
+        - name: Complete catalog task
+          servicenow.itsm.api:
+            resource: sc_task
+            action: patch
+            sys_id: "{{ r_snow_sctask.record.sys_id }}"
+            data:
+              work_notes: "{{ r_panos_security_rule | to_nice_json(indent=2) }}"
+              state: closed_complete
+
+        - name: Complete ServiceNow requested item
+          register: r_snow_ticket
+          servicenow.itsm.api_info:
+            resource: sc_req_item
+            sys_id: "{{ snow_sys_id }}"
+            action: patch
+            data:
+              state: closed_complete
