@@ -31,7 +31,7 @@
               short_description: Ansible Job Template running to modify security rule
               description: https://controller.autodotes.com/#/jobs/playbook/{{ awx_job_id | default('unk') }}/details
               request_item: "{{ snow_sys_id }}"
-              cmdb_ci: "{{ r_snow_ci.record.sys_id }}"
+              cmdb_ci: "{{ r_snow_ci.records[0].sys_id }}"
 
     - name: Define PanOS security rule
       register: r_panos_security_rule
