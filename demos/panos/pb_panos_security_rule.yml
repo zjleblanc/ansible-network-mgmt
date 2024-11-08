@@ -65,7 +65,7 @@
             data:
               work_notes: >-
                 [code]<pre>
-                {{ r_panos_security_rule | to_nice_json(indent=2) | replace('\n', '<br>') }}"
+                {{ r_panos_security_rule | to_nice_json(indent=2) | replace('\\n', '<br>') }}"
                 </pre>[/code]
               state: 3 # Closed Complete
 
