@@ -18,13 +18,13 @@
         provider: "{{ panos_provider }}"
         rule_name: "{{ panos_rule_name }}"
         rule_type: "{{ panos_rule_type | default(omit) }}"
-        action: "{{ panos_action | default(omit) }}"
-        # location: "{{ panos_location | default(omit) }}"
-        source_zone: "{{ [panos_source_zone] | default(omit) }}"
-        source_ip: "{{ [panos_source_ip] | default(omit) }}"
-        destination_zone: "{{ [panos_destination_zone] | default(omit) }}"
-        destination_ip: "{{ [panos_destination_ip] | default(omit) }}"
-        state: "{{ panos_state | default(omit) }}"
+        action: "{{ panos_action | ternary(panos_action, 'allow') }}"
+        location: "{{ panos_location | ternary(panos_action, omit) }}"
+        source_zone: "{{ panos_source_zone | ternary ([panos_source_zone], ['any']) }}"
+        source_ip: "{{ panos_source_ip | ternary ([panos_source_ip], ['any']) }}"
+        destination_zone: "{{ panos_destination_zone | ternary ([panos_destination_zone], ['any']) }}"
+        destination_ip: "{{ panos_destination_ip | ternary ([panos_destination_ip], ['any']) }}"
+        state: "{{ panos_state | ternary (panos_state, 'present') }}"
 
     - name: Commit firewall changes
       when: panos_commit | default(false) | bool
