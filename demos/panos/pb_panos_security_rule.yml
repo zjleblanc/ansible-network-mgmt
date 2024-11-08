@@ -63,10 +63,7 @@
             action: patch
             sys_id: "{{ r_snow_sctask.record.sys_id }}"
             data:
-              work_notes: >-
-                [code]<pre>
-                {{ r_panos_security_rule | to_nice_json(indent=2) | replace('\\n', '<br>') }}"
-                </pre>[/code]
+              work_notes: "{{ r_panos_security_rule | to_nice_json(indent=2) | codify }}"
               state: 3 # Closed Complete
 
         - name: Complete ServiceNow requested item
