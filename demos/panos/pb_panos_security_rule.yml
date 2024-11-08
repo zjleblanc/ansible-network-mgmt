@@ -64,7 +64,7 @@
             sys_id: "{{ r_snow_sctask.record.sys_id }}"
             data:
               work_notes: "{{ r_panos_security_rule | to_nice_json(indent=2) }}"
-              state: closed_complete
+              state: 3 # Closed Complete
 
         - name: Complete ServiceNow requested item
           register: r_snow_ticket
@@ -73,4 +73,5 @@
             sys_id: "{{ snow_sys_id }}"
             action: patch
             data:
-              state: closed_complete
+              state: 3 # Closed Complete
+
