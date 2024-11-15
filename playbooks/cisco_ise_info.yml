@@ -22,12 +22,11 @@
 
     - name: Print the result for each device ID
       ansible.builtin.debug:
-        msg: 
-        - "CSR1000v: {{ r_network_device_info.ise_response | selectattr('name', 'match', 'CSR1000v') | map(attribute='id') }}" 
-        - "Cat8000: {{ r_network_device_info.ise_response | selectattr('name', 'match', 'Cat8000') | map(attribute='id') }}" 
+        msg: "{{ r_network_device_info.ise_response }}"
      
-    - name: Get user info for our network devices  # run through our list of groups and obtain the group information
+    - name: Get details for our network devices  # run through our list of groups and obtain the group information
       loop: "{{ r_network_device_info.ise_response | map(attribute='id') }}"
+      register: r_network_device_details
       cisco.ise.network_device_info:
         ise_hostname: "{{ ise_hostname }}"
         ise_username: "{{ ise_username }}"
@@ -37,4 +36,4 @@
     
     - name: Print the result for each device ID
       ansible.builtin.debug:
-        var: r_network_device_id
+        var: r_network_device_details
