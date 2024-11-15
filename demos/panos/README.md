@@ -16,6 +16,7 @@ Kudos to my references for this demo:
 | amazon.aws | 8.2.1 |
 | paloaltonetworks.panos | 2.21.2 |
 | servicenow.itsm | 2.4.0 |
+| redhat.rhel_system_roles | 1.21.2 |
 
 ## Pre-requisites
 
@@ -120,7 +121,7 @@ This playbook can be run locally, but requires an understanding of how to use th
 
 **IMPORTANT**: the private key referenced must be a associated with the key pair attached to both VMs (the bastion and webserver). Refer to the `panos_demo_keypair` variable in [vars/panos_infra.yml](./vars/panos_infra.yml).
 
-Test the inventory setup:<br>`ansible-inventory --list -i inventory/`
+Test the inventory setup:<br>`ansible-inventory -y --list -i inventory/ > inventory_check.yml`  
 
 Run the playbook and specify the dynamic inventory:<br>`ansible-playbook -i inventory/ pb_webserver_setup.yml`
 
