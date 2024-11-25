@@ -4,6 +4,13 @@
   gather_facts: false
   become: false
 
+  vars:
+    credential_secure_logging: true
+    has_gateway: true
+    org_base_url: "{{ has_gateway | ternary('api/gateway/v1/organizations', 'api/v2/organizations') }}"
+    credential_base_url: "{{ has_gateway | ternary('api/controller/v2/credentials', 'api/v2/credentials') }}"
+    credential_type_base_url: "{{ has_gateway | ternary('api/controller/v2/credential_types', 'api/v2/credential_types') }}"
+
   vars_files:
     - "{{ playbook_dir }}/vars/panos_infra.yml"
     - "{{ playbook_dir }}/vars/panos_secrets.yml"
@@ -239,23 +246,8 @@
 
         - name: Update credential in AAP | Palo Alto Firewall (admin)
           when: lookup('env', 'CONTROLLER_HOST')
-          no_log: true
-          ansible.builtin.uri:
-            url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/96/"
-            method: PATCH
-            headers:
-              Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
-            body_format: json
-            body:
-              name: Palo Alto Firewall (admin)
-              organization: 3 # Autodotes
-              isOrgLookupDisabled: false
-              description: Palo Alto Firewall administrator credentials compatible with the palaltonetworks.panos collection
-              credential_type: 57 # Palo Alto Networks Provider
-              inputs:
-                panos_ip_address: "{{ r_eip_mgmt.public_ip }}"
-                panos_username: admin
-                panos_password: "{{ panos_demo_password }}"
+          ansible.builtin.include_tasks:
+            file: tasks/update_credential_palo_fw.yml
 
     - name: Create bastion host
       when: create_bastion | default(true)
@@ -317,23 +309,8 @@
 
         - name: Update credential in AAP | Palo Alto Bastion
           when: lookup('env', 'CONTROLLER_HOST')
-          no_log: true
-          ansible.builtin.uri:
-            url: "{{ lookup('env', 'CONTROLLER_HOST') }}/api/v2/credentials/94/"
-            method: PATCH
-            headers:
-              Authorization: "Bearer {{ lookup('env', 'CONTROLLER_OAUTH_TOKEN') }}"
-            body_format: json
-            body:
-              name: Palo Alto Bastion
-              organization: 3 # Autodotes
-              isOrgLookupDisabled: false
-              description: Palo Alto Bastion credential for supporting SSH proxy implementation
-              credential_type: 54 # SSH Proxy
-              inputs:
-                ssh_proxy_username: "ec2-user"
-                ssh_proxy_host: "{{ r_bastion_eip_public.public_ip }}"
-                ssh_proxy_key: "$encrypted$"
+          ansible.builtin.include_tasks:
+            file: tasks/update_credential_bastion.yml
 
     - name: Create webserver host
       when: create_webserver | default(true)
