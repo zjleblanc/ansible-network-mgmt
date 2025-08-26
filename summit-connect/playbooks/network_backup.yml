@@ -94,7 +94,7 @@
         organization: Autodotes
         job_type: run
         inventory: Cisco Lab
-        project: Network Management
+        project: Network Mgmt
         playbook: summit-connect/playbooks/network_restore.yml
         execution_environment: ee-networking
         ask_variables_on_launch: true
