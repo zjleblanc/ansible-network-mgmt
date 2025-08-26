@@ -87,6 +87,8 @@
 
     - name: Update Network Restore survey options
       when: git_tag_list is defined
+      vars:
+        tag_choices: "{{ (git_tag_list | length > 10) | ternary(git_tag_list[-10:], git_tag_list) | reverse | list }}"
       ansible.controller.job_template:
         name: Summit Connect // Network Restore
         organization: Autodotes
@@ -110,8 +112,8 @@
               question_description: "Each backup commit is tagged with the time it was created"
               variable: backup_config_tag
               type: "multiplechoice"
-              choices: "{{ git_tag_list | default(['undef']) | reverse | list }}"
-              default: "{{ git_tag_list[-1] }}"
+              choices: "{{ tag_choices }}"
+              default: "{{ tag_choices[0] }}"
               required: true
         credentials:
           - Git Role Credential
